@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Flame Graph</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://d3js.org/d3.v6.js"></script>
+  <script src="https://d3js.org/d3-hierarchy.v2.js"></script>
+</head>
+<body>
+  <input id="term" type="text" class="form-control" />
+  <button id="searchButton">Search</button>
+  <input id="flip" type="checkbox" checked/><span>Flip</span>
+  <div id="container">
+    <svg id="chart"></svg>
+    <script type="module" src="./flamechart.js"></script>
+  </div>
+</body>
+</html>

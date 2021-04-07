@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "module": "None",
+        "esModuleInterop": false,
+        "target": "es2017",
+        "noImplicitAny": true,
+        "inlineSourceMap": true,
+        "outDir": "out",
+        "skipLibCheck": true,
+        "noUnusedLocals": true,
+        "strict": true,
+        "allowUmdGlobalAccess": true
+    },
+    "include": [
+        "./src/**/*"
+    ]
+}
