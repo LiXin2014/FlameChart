@@ -25,8 +25,8 @@ class FlameChart {
     constructor(root: d3.HierarchyNode<INode>) {
         this._isFlipped = (document.getElementById("flip") as HTMLInputElement).checked;
 
-        const summed = root.sum((d: any) => d.value);
-        const sorted = summed.sort((a: any, b: any) => d3.descending(a.height, b.height) || d3.descending(a.value, b.value));
+        const summed = root.sum((d: INode) => d.value);
+        const sorted = summed.sort((a: d3.HierarchyNode<INode>, b: d3.HierarchyNode<INode>) => d3.descending(a.height, b.height) || d3.descending(a.value, b.value));
 
         this._width = document.body.clientWidth;
         this._height = document.body.clientHeight / 2;
@@ -61,9 +61,9 @@ class FlameChart {
             .attr("aria-label", d => d.data.name)
             .attr("fill", d => this.colorScale((d.children ? d : d.parent)!.data.name))
             .style("cursor", "pointer")
-            .on("click", (e: any, p: d3.HierarchyRectangularNode<INode>) => this.onClicked(e, p))
-            .on("mouseover", (e: any, p: d3.HierarchyRectangularNode<INode>) => this.onMouseOver(e, p))
-            .on("mouseout", (e: any, p: d3.HierarchyRectangularNode<INode>) => this.onMouseOut(e, p));
+            .on("click", (e: Event, p: d3.HierarchyRectangularNode<INode>) => this.onClicked(e, p))
+            .on("mouseover", (e: Event, p: d3.HierarchyRectangularNode<INode>) => this.onMouseOver(e, p))
+            .on("mouseout", (e: Event, p: d3.HierarchyRectangularNode<INode>) => this.onMouseOut(e, p));
 
         this._texts = this._cells.append("text")
             .attr("x", d => this.getScaleX(this._nodesWidth)(d.x1 - d.x0) / 2)
@@ -108,15 +108,15 @@ class FlameChart {
                 .attr("width", this._width).attr("height", this._height);
 
             this._cells
-                .attr("transform", (d: any) => `translate(${this.getScaleX(this._nodesWidth)(d.x0)},${this.getOffsetY(d)})`);
+                .attr("transform", (d: d3.HierarchyRectangularNode<INode>) => `translate(${this.getScaleX(this._nodesWidth)(d.x0)},${this.getOffsetY(d)})`);
 
             this._rects
-                .attr("width", (d: any) => this.getScaleX(this._nodesWidth)(d.x1 - d.x0))
-                .attr("height", (d: any) => this.getScaleY(this._nodesHeight)(d.y1 - d.y0));
+                .attr("width", (d: d3.HierarchyRectangularNode<INode>) => this.getScaleX(this._nodesWidth)(d.x1 - d.x0))
+                .attr("height", (d: d3.HierarchyRectangularNode<INode>) => this.getScaleY(this._nodesHeight)(d.y1 - d.y0));
 
             this._texts
-                .attr("x", (d: any) => this.getScaleX(this._nodesWidth)(d.x1 - d.x0) / 2)
-                .attr("y", (d: any) => this.getScaleY(this._nodesHeight)(d.y1 - d.y0) / 2);
+                .attr("x", (d: d3.HierarchyRectangularNode<INode>) => this.getScaleX(this._nodesWidth)(d.x1 - d.x0) / 2)
+                .attr("y", (d: d3.HierarchyRectangularNode<INode>) => this.getScaleY(this._nodesHeight)(d.y1 - d.y0) / 2);
         }
 
         if (forceRender) {
@@ -132,7 +132,7 @@ class FlameChart {
         this._resizeTimeout = setTimeout(() => render(), 100);
     }
 
-    private onClicked(event: any, p: d3.HierarchyRectangularNode<INode>) {
+    private onClicked(event: Event, p: d3.HierarchyRectangularNode<INode>) {
         // p became the new root.
         this._currentFocus = this._currentFocus === p ? p = p.parent ?? p : p;
 
@@ -165,7 +165,7 @@ class FlameChart {
             .attr("y", (d: any) => this.getScaleY(this._nodesHeight)(d.target.y1 - d.target.y0) / 2);
     }
 
-    private onMouseOver(event: any, d: any) {
+    private onMouseOver(event: Event, d: any) {
         const x = this.getScaleX(this._nodesWidth)(d.x0);
         const y = this.getOffsetY(d.target ?? d);
 
@@ -178,7 +178,7 @@ class FlameChart {
             .style("top", y + "px");
     }
 
-    private onMouseOut(event: any, d: any) {
+    private onMouseOut(event: Event, d: d3.HierarchyRectangularNode<INode>) {
         this._div.transition()
             .duration(500)
             .style("opacity", 0.9);
