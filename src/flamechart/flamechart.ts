@@ -63,7 +63,8 @@ class FlameChart {
             .style("cursor", "pointer")
             .on("click", (e: Event, p: d3.HierarchyRectangularNode<INode>) => this.onClicked(e, p))
             .on("mouseover", (e: Event, p: d3.HierarchyRectangularNode<INode>) => this.onMouseOver(e, p))
-            .on("mouseout", (e: Event, p: d3.HierarchyRectangularNode<INode>) => this.onMouseOut(e, p));
+            .on("mouseout", (e: Event, p: d3.HierarchyRectangularNode<INode>) => this.onMouseOut(e, p))
+            .on("mousemove", (e: MouseEvent, p: d3.HierarchyRectangularNode<INode>) => this.onMouseMove(e, p));
 
         this._texts = this._cells.append("text")
             .attr("x", d => this.getScaleX(this._nodesWidth)(d.x1 - d.x0) / 2)
@@ -166,22 +167,22 @@ class FlameChart {
     }
 
     private onMouseOver(event: Event, d: any) {
-        const x = this.getScaleX(this._nodesWidth)(d.x0);
-        const y = this.getOffsetY(d.target ?? d);
 
         this._div.transition()
             .duration(200)
             .style("opacity", .9);
-
-        this._div.html(d.data.name)
-            .style("left", x + "px")
-            .style("top", y + "px");
     }
 
     private onMouseOut(event: Event, d: d3.HierarchyRectangularNode<INode>) {
         this._div.transition()
             .duration(500)
-            .style("opacity", 0.9);
+            .style("opacity", 0);
+    }
+
+    private onMouseMove(event: MouseEvent, d: d3.HierarchyRectangularNode<INode>) {
+        this._div.html(d.data.name)
+            .style("left", event.clientX + "px")
+            .style("top", event.clientY + "px");
     }
 
     private onSearch() {
