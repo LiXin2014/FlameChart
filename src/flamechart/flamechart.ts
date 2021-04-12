@@ -18,6 +18,7 @@ class FlameChart {
     private _cells: d3.Selection<SVGGElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
     private _rects: d3.Selection<SVGRectElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
     private _texts: d3.Selection<SVGTextElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
+    private _spans: d3.Selection<SVGTSpanElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
     private _colorScale = d3.scaleOrdinal(d3.schemeCategory10);
     private _resizeTimeout: any = 0;
     private _isFlipped: boolean = false;
@@ -52,7 +53,7 @@ class FlameChart {
             .data(this._nodes)
             .join("g")
             .attr("transform", d => `translate(${this.getScaleX(this._nodesWidth)(d.x0)},${this.getOffsetY(d)})`);
-
+            
         this._rects = this._cells.append("rect")
             .attr("width", d => this.getScaleX(this._nodesWidth)(d.x1 - d.x0))
             .attr("height", d => this.getScaleY(this._nodesHeight)(d.y1 - d.y0))
@@ -71,8 +72,11 @@ class FlameChart {
             .attr("y", d => this.getScaleY(this._nodesHeight)(d.y1 - d.y0) / 2)
             .attr("dy", "0.32em")
             .attr("text-anchor", d => "middle")
-            .attr("font-size", d => 3 - d.depth + "em")
-            .text(d => d.data.name);
+            .attr("font-size", d => 3 - d.depth + "em");
+
+        this._spans = this._texts.append('tspan')
+                .text(function(d) { return d.data.name; })
+                .each((d, i, e) => this.wrap(d, i, e))
 
         // Hook up search button
         const searchButton = document.getElementById("searchButton") as HTMLButtonElement;
@@ -81,6 +85,26 @@ class FlameChart {
         document.getElementById("flip")?.addEventListener("click", () => this.onFlip());
 
         window.addEventListener("resize", () => this.onResize());
+    }
+
+    private wrap(node: d3.HierarchyRectangularNode<INode>, index: number, elementGroup: SVGTSpanElement[] | ArrayLike<SVGTSpanElement>) {
+        let tspanElement: SVGTSpanElement = elementGroup[index];
+        let textContent: string | null = tspanElement.textContent;
+        let textLength: number = tspanElement.getComputedTextLength();
+        let getWidth = (node: d3.HierarchyRectangularNode<INode>) => this.getScaleX(this._nodesWidth)(node.x1 - node.x0);
+        let width = (getWidth(node) - 2 * 2);
+
+        // If the width is less than 20px, don't show function name.
+        if(width < 20) {
+            tspanElement.textContent = '';
+            return;
+        }
+
+        while (textLength > (getWidth(node) - 2 * 2) && textLength > 0) {
+            textContent = textContent?.slice(0, -1) || null;
+            tspanElement.textContent = textContent + '...';
+            textLength = tspanElement.getComputedTextLength();
+        }
     }
 
     private getScaleX(nodesWidth: number) {
@@ -118,6 +142,10 @@ class FlameChart {
             this._texts
                 .attr("x", (d: d3.HierarchyRectangularNode<INode>) => this.getScaleX(this._nodesWidth)(d.x1 - d.x0) / 2)
                 .attr("y", (d: d3.HierarchyRectangularNode<INode>) => this.getScaleY(this._nodesHeight)(d.y1 - d.y0) / 2);
+
+            this._spans
+                .text(function(d) { return d.data.name; })
+                .each((d, i, e) => this.wrap(d, i, e));
         }
 
         if (forceRender) {
