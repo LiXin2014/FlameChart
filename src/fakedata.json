@@ -1,0 +1,100 @@
+{
+  "name": "PrimeVisualizer.App.Main",
+  "value": 400,
+  "children": [
+    {
+      "name": "System.Windows.Application.Run",
+      "value": 150,
+      "children": [
+        {
+          "name": "InitializeComponent",
+          "value": 78
+        },
+        {
+          "name": "GeneratePrimes",
+          "value": 18
+        }
+      ]
+    },
+    {
+      "name": "PrimeVisualizer.App.ctor",
+      "value": 190,
+      "children": [
+        {
+          "name": "System.Windows.Application.ctor",
+          "value": 16
+        },
+        {
+          "name": "Fake00000000000000000000000",
+          "value": 160,
+          "children": [
+            {
+              "name": "Fake11111111111111111111111",
+              "value": 10,
+              "children": [
+                {
+                  "name": "Fake22222222222222222222222222222",
+                  "value": 5,
+                  "children": [
+                    {
+                      "name": "Fake33333333333333333333333333",
+                      "value": 5,
+                      "children": [
+                        {
+                          "name": "Fake4444444444444444444444444444",
+                          "value": 3,
+                          "children": [
+                            {
+                              "name": "Fake555555555555555555555555555555555",
+                              "value": 3,
+                              "children": [
+                                {
+                                  "name": "Fake6666666666666666666666666666666",
+                                  "value": 3,
+                                  "children": [
+                                    {
+                                      "name": "Fake777777777777777777777777777",
+                                      "value": 2,
+                                      "children": [
+                                        {
+                                          "name": "Fake888888888888888888888888888",
+                                          "value": 1,
+                                          "children": [
+                                            {
+                                              "name": "Fake999999999999999999999999",
+                                              "value": 1,
+                                              "children": [
+                                                {
+                                                  "name": "Fake10101010101010101010101010",
+                                                  "value": 1,
+                                                  "children": [
+                                                    {
+                                                      "name": "Fake10101010101010101010101011",
+                                                      "value": 1
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

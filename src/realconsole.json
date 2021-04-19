@@ -1,0 +1,886 @@
+{
+  "name": "ConsoleApp7.exe",
+  "value": 974,
+  "children": [
+    {
+      "name": "",
+      "value": 961,
+      "children": [
+        {
+          "name": "ConsoleApp7.Program.Main(System.String[])",
+          "value": 815,
+          "children": [
+            {
+              "name": "System.Console.WriteLine(string)",
+              "value": 797,
+              "children": [
+                {
+                  "name": "System.IO.TextWriter.TextWriter+SyncTextWriter.WriteLine(string)",
+                  "value": 790,
+                  "children": [
+                    {
+                      "name": "System.IO.StreamWriter.WriteLine(string)",
+                      "value": 783,
+                      "children": [
+                        {
+                          "name": "System.IO.StreamWriter.Flush(bool, bool)",
+                          "value": 778,
+                          "children": [
+                            {
+                              "name": "System.ConsolePal.ConsolePal+WindowsConsoleStream.Write(uint8[], int, int)",
+                              "value": 715,
+                              "children": [
+                                {
+                                  "name": "System.ConsolePal.ConsolePal+WindowsConsoleStream.WriteFileNative(int, uint8[], int, int, bool)",
+                                  "value": 710,
+                                  "children": [
+                                    {
+                                      "name": "dynamicClass.IL_STUB_PInvoke(int, byte*, int, ref int, int)",
+                                      "value": 698,
+                                      "children": [
+                                        {
+                                          "name": "0xfffff8032cc075b5",
+                                          "value": 11,
+                                          "children": [
+                                            {
+                                              "name": "0xfffff8032cde456f",
+                                              "value": 11,
+                                              "children": [
+                                                {
+                                                  "name": "0xfffff8032cdfd898",
+                                                  "value": 9,
+                                                  "children": [
+                                                    {
+                                                      "name": "0xfffff8032ca52f55",
+                                                      "value": 9,
+                                                      "children": [
+                                                        {
+                                                          "name": "0xfffff8032875af40",
+                                                          "value": 9,
+                                                          "children": [
+                                                            {
+                                                              "name": "0xfffff803287586a5",
+                                                              "value": 8,
+                                                              "children": [
+                                                                {
+                                                                  "name": "0xfffff80328759b32",
+                                                                  "value": 6,
+                                                                  "children": [
+                                                                    {
+                                                                      "name": "0xfffff8032ca48727",
+                                                                      "value": 6,
+                                                                      "children": [
+                                                                        {
+                                                                          "name": "0xfffff8032ca48c87",
+                                                                          "value": 4,
+                                                                          "children": [
+                                                                            {
+                                                                              "name": "0xfffff8032ca4a891",
+                                                                              "value": 4,
+                                                                              "children": [
+                                                                                {
+                                                                                  "name": "0xfffff8032ca4b404",
+                                                                                  "value": 4,
+                                                                                  "children": [
+                                                                                    {
+                                                                                      "name": "0xfffff8032ca6e3ef",
+                                                                                      "value": 4,
+                                                                                      "children": []
+                                                                                    }
+                                                                                  ]
+                                                                                }
+                                                                              ]
+                                                                            }
+                                                                          ]
+                                                                        },
+                                                                        {
+                                                                          "name": "0xfffff8032ca48d6e",
+                                                                          "value": 2,
+                                                                          "children": [
+                                                                            {
+                                                                              "name": "0xfffff8032ca47ce3",
+                                                                              "value": 1,
+                                                                              "children": []
+                                                                            },
+                                                                            {
+                                                                              "name": "0xfffff8032ca47ed1",
+                                                                              "value": 1,
+                                                                              "children": []
+                                                                            }
+                                                                          ]
+                                                                        }
+                                                                      ]
+                                                                    }
+                                                                  ]
+                                                                },
+                                                                {
+                                                                  "name": "0xfffff80328759b36",
+                                                                  "value": 1,
+                                                                  "children": []
+                                                                },
+                                                                {
+                                                                  "name": "0xfffff803287598f0",
+                                                                  "value": 1,
+                                                                  "children": [
+                                                                    {
+                                                                      "name": "0xfffff8032ca74c12",
+                                                                      "value": 1,
+                                                                      "children": [
+                                                                        {
+                                                                          "name": "0xfffff8032ca75142",
+                                                                          "value": 1,
+                                                                          "children": []
+                                                                        }
+                                                                      ]
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              ]
+                                                            },
+                                                            {
+                                                              "name": "0xfffff80328758644",
+                                                              "value": 1,
+                                                              "children": [
+                                                                {
+                                                                  "name": "0xfffff80328759cf4",
+                                                                  "value": 1,
+                                                                  "children": [
+                                                                    {
+                                                                      "name": "0xfffff80328759d94",
+                                                                      "value": 1,
+                                                                      "children": []
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              ]
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "name": "0xfffff8032cdfd928",
+                                                  "value": 1,
+                                                  "children": [
+                                                    {
+                                                      "name": "0xfffff8032ca64623",
+                                                      "value": 1,
+                                                      "children": [
+                                                        {
+                                                          "name": "0xfffff8032ca64d7f",
+                                                          "value": 1,
+                                                          "children": [
+                                                            {
+                                                              "name": "0xfffff8032ca65850",
+                                                              "value": 1,
+                                                              "children": [
+                                                                {
+                                                                  "name": "0xfffff8032cbfc9d6",
+                                                                  "value": 1,
+                                                                  "children": [
+                                                                    {
+                                                                      "name": "0xfffff8032cbfcf52",
+                                                                      "value": 1,
+                                                                      "children": []
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              ]
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "name": "0xfffff8032cdfd94a",
+                                                  "value": 1,
+                                                  "children": [
+                                                    {
+                                                      "name": "0xfffff8032ca5eec4",
+                                                      "value": 1,
+                                                      "children": []
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "name": "0xfffff8032cdfd928",
+                                          "value": 6,
+                                          "children": [
+                                            {
+                                              "name": "0xfffff8032ca64623",
+                                              "value": 5,
+                                              "children": [
+                                                {
+                                                  "name": "0xfffff8032ca64d7f",
+                                                  "value": 5,
+                                                  "children": [
+                                                    {
+                                                      "name": "0xfffff8032ca65850",
+                                                      "value": 5,
+                                                      "children": [
+                                                        {
+                                                          "name": "0xfffff8032cbfc9d6",
+                                                          "value": 5,
+                                                          "children": [
+                                                            {
+                                                              "name": "0xfffff8032cbfce15",
+                                                              "value": 1,
+                                                              "children": []
+                                                            },
+                                                            {
+                                                              "name": "0xfffff8032cbfd025",
+                                                              "value": 1,
+                                                              "children": []
+                                                            },
+                                                            {
+                                                              "name": "0xfffff8032cbfd060",
+                                                              "value": 1,
+                                                              "children": []
+                                                            },
+                                                            {
+                                                              "name": "0xfffff8032cbfd10e",
+                                                              "value": 1,
+                                                              "children": []
+                                                            },
+                                                            {
+                                                              "name": "0xfffff8032cbfd133",
+                                                              "value": 1,
+                                                              "children": []
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "name": "0xfffff8032ca64457",
+                                              "value": 1,
+                                              "children": []
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "name": "0xfffff80329ab0003",
+                                          "value": 2,
+                                          "children": []
+                                        },
+                                        {
+                                          "name": "0xfffff8032cde464c",
+                                          "value": 2,
+                                          "children": [
+                                            {
+                                              "name": "0xfffff8032caa68f9",
+                                              "value": 2,
+                                              "children": [
+                                                {
+                                                  "name": "0xfffff8032caa6a63",
+                                                  "value": 1,
+                                                  "children": [
+                                                    {
+                                                      "name": "0xfffff8032caa7557",
+                                                      "value": 1,
+                                                      "children": [
+                                                        {
+                                                          "name": "0xfffff8032ca0dcab",
+                                                          "value": 1,
+                                                          "children": []
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "name": "0xfffff8032caa6ace",
+                                                  "value": 1,
+                                                  "children": [
+                                                    {
+                                                      "name": "0xfffff8032caa71da",
+                                                      "value": 1,
+                                                      "children": [
+                                                        {
+                                                          "name": "0xfffff8032caa85ff",
+                                                          "value": 1,
+                                                          "children": []
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "name": "0xfffff80328758659",
+                                          "value": 1,
+                                          "children": []
+                                        },
+                                        {
+                                          "name": "0xfffff8032cdfd933",
+                                          "value": 1,
+                                          "children": []
+                                        },
+                                        {
+                                          "name": "0xfffff80328759b55",
+                                          "value": 1,
+                                          "children": [
+                                            {
+                                              "name": "0xfffff8032ca60975",
+                                              "value": 1,
+                                              "children": [
+                                                {
+                                                  "name": "0xfffff8032cb5a6a3",
+                                                  "value": 1,
+                                                  "children": [
+                                                    {
+                                                      "name": "0xfffff8032cb5a76e",
+                                                      "value": 1,
+                                                      "children": [
+                                                        {
+                                                          "name": "0xfffff8032ca4a31a",
+                                                          "value": 1,
+                                                          "children": [
+                                                            {
+                                                              "name": "0xfffff8032ca4a891",
+                                                              "value": 1,
+                                                              "children": [
+                                                                {
+                                                                  "name": "0xfffff8032ca4b404",
+                                                                  "value": 1,
+                                                                  "children": [
+                                                                    {
+                                                                      "name": "0xfffff8032ca6e3ef",
+                                                                      "value": 1,
+                                                                      "children": []
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              ]
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "name": "0xfffff8032ca48d6e",
+                                          "value": 1,
+                                          "children": [
+                                            {
+                                              "name": "0xfffff8032ca47cd4",
+                                              "value": 1,
+                                              "children": []
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "name": "System.Text.OSEncoder.GetBytes(wchar[], int, int, uint8[], int, bool)",
+                              "value": 32,
+                              "children": [
+                                {
+                                  "name": "System.Text.OSEncoder.GetBytes(char*, int, byte*, int, bool)",
+                                  "value": 29,
+                                  "children": [
+                                    {
+                                      "name": "System.Text.OSEncoding.WideCharToMultiByte(int, char*, int, byte*, int)",
+                                      "value": 22,
+                                      "children": []
+                                    },
+                                    {
+                                      "name": "System.Text.Encoding.get_CodePage()",
+                                      "value": 2,
+                                      "children": []
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "name": "System.ConsolePal.ConsolePal+WindowsConsoleStream.Flush()",
+                              "value": 1,
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "name": "System.Buffer.Memmove(byte*, byte*, ulong)",
+                          "value": 2,
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "name": "System.Private.CoreLib.dll!0x007ffe43032696",
+                      "value": 1,
+                      "children": [
+                        {
+                          "name": "System.Private.CoreLib.dll!0x007ffe42ff6cb4",
+                          "value": 1,
+                          "children": [
+                            {
+                              "name": "System.Console.dll!0x007ffe90de3369",
+                              "value": 1,
+                              "children": [
+                                {
+                                  "name": "System.Console.dll!0x007ffe90de3524",
+                                  "value": 1,
+                                  "children": [
+                                    {
+                                      "name": "dynamicClass.IL_STUB_PInvoke(int, byte*, int, ref int, int)",
+                                      "value": 1,
+                                      "children": []
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "System.Console.get_Out()",
+                  "value": 4,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "System.Console.dll!0x007ffe90de32fe",
+              "value": 11,
+              "children": [
+                {
+                  "name": "System.Console.dll!0x007ffe90de2d6a",
+                  "value": 8,
+                  "children": [
+                    {
+                      "name": "System.Private.CoreLib.dll!0x007ffe43122815",
+                      "value": 8,
+                      "children": [
+                        {
+                          "name": "System.Private.CoreLib.dll!0x007ffe431228ac",
+                          "value": 8,
+                          "children": [
+                            {
+                              "name": "System.Console.dll!0x007ffe90de2db5",
+                              "value": 5,
+                              "children": [
+                                {
+                                  "name": "System.Console.dll!0x007ffe90de2e57",
+                                  "value": 3,
+                                  "children": [
+                                    {
+                                      "name": "System.Console.dll!0x007ffe90de2f4b",
+                                      "value": 3,
+                                      "children": [
+                                        {
+                                          "name": "System.Console.dll!0x007ffe90de306a",
+                                          "value": 2,
+                                          "children": [
+                                            {
+                                              "name": "System.Private.CoreLib.dll!0x007ffe43122815",
+                                              "value": 2,
+                                              "children": [
+                                                {
+                                                  "name": "System.Private.CoreLib.dll!0x007ffe431228ac",
+                                                  "value": 2,
+                                                  "children": [
+                                                    {
+                                                      "name": "System.Console.dll!0x007ffe90de2c5c",
+                                                      "value": 2,
+                                                      "children": []
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "name": "System.Console.dll!0x007ffe90de2e0d",
+                                  "value": 1,
+                                  "children": []
+                                },
+                                {
+                                  "name": "System.Console.dll!0x007ffe90de2e9d",
+                                  "value": 1,
+                                  "children": []
+                                }
+                              ]
+                            },
+                            {
+                              "name": "System.Console.dll!0x007ffe90de2dbe",
+                              "value": 3,
+                              "children": [
+                                {
+                                  "name": "System.Console.dll!0x007ffe90de3129",
+                                  "value": 2,
+                                  "children": [
+                                    {
+                                      "name": "System.Private.CoreLib.dll!0x007ffe42ff693a",
+                                      "value": 1,
+                                      "children": []
+                                    },
+                                    {
+                                      "name": "System.Private.CoreLib.dll!0x007ffe42ff6951",
+                                      "value": 1,
+                                      "children": [
+                                        {
+                                          "name": "System.Private.CoreLib.dll!0x007ffe42ff18de",
+                                          "value": 1,
+                                          "children": [
+                                            {
+                                              "name": "System.Private.CoreLib.dll!0x007ffe42ff07d5",
+                                              "value": 1,
+                                              "children": [
+                                                {
+                                                  "name": "System.Private.CoreLib.dll!0x007ffe42ff572e",
+                                                  "value": 1,
+                                                  "children": [
+                                                    {
+                                                      "name": "System.Private.CoreLib.dll!0x007ffe42ff0db3",
+                                                      "value": 1,
+                                                      "children": [
+                                                        {
+                                                          "name": "System.Private.CoreLib.dll!0x007ffe42ff14f4",
+                                                          "value": 1,
+                                                          "children": [
+                                                            {
+                                                              "name": "System.Private.CoreLib.dll!0x007ffe42ff153d",
+                                                              "value": 1,
+                                                              "children": [
+                                                                {
+                                                                  "name": "System.Private.CoreLib.dll!0x007ffe42ff5400",
+                                                                  "value": 1,
+                                                                  "children": []
+                                                                }
+                                                              ]
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "name": "System.Console.dll!0x007ffe90de3149",
+                                  "value": 1,
+                                  "children": [
+                                    {
+                                      "name": "System.Private.CoreLib.dll!0x007ffe42ff6d77",
+                                      "value": 1,
+                                      "children": [
+                                        {
+                                          "name": "System.Private.CoreLib.dll!0x007ffe42ff6e12",
+                                          "value": 1,
+                                          "children": [
+                                            {
+                                              "name": "System.Private.CoreLib.dll!0x007ffe42ff56cf",
+                                              "value": 1,
+                                              "children": [
+                                                {
+                                                  "name": "System.Private.CoreLib.dll!0x007ffe42ff15bc",
+                                                  "value": 1,
+                                                  "children": [
+                                                    {
+                                                      "name": "System.Private.CoreLib.dll!0x007ffe42ff160f",
+                                                      "value": 1,
+                                                      "children": [
+                                                        {
+                                                          "name": "System.Private.CoreLib.dll!0x007ffe42ff58de",
+                                                          "value": 1,
+                                                          "children": []
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "System.Console.dll!0x007ffe90de3313",
+              "value": 2,
+              "children": [
+                {
+                  "name": "System.Private.CoreLib.dll!0x007ffe430324a3",
+                  "value": 2,
+                  "children": [
+                    {
+                      "name": "System.Private.CoreLib.dll!0x007ffe43032696",
+                      "value": 2,
+                      "children": [
+                        {
+                          "name": "System.Private.CoreLib.dll!0x007ffe42ff6cb4",
+                          "value": 2,
+                          "children": [
+                            {
+                              "name": "System.Console.dll!0x007ffe90de3369",
+                              "value": 2,
+                              "children": [
+                                {
+                                  "name": "System.Console.dll!0x007ffe90de3524",
+                                  "value": 2,
+                                  "children": [
+                                    {
+                                      "name": "dynamicClass.IL_STUB_PInvoke(int, byte*, int, ref int, int)",
+                                      "value": 2,
+                                      "children": []
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "System.Private.CoreLib.dll!0x007ffe42feff97",
+          "value": 8,
+          "children": [
+            {
+              "name": "System.Private.CoreLib.dll!0x007ffe42ff031e",
+              "value": 8,
+              "children": [
+                {
+                  "name": "System.Private.CoreLib.dll!0x007ffe42ff04a8",
+                  "value": 8,
+                  "children": [
+                    {
+                      "name": "System.Private.CoreLib.dll!0x007ffe42ff2e50",
+                      "value": 6,
+                      "children": [
+                        {
+                          "name": "System.Private.CoreLib.dll!0x007ffe42ff326c",
+                          "value": 5,
+                          "children": [
+                            {
+                              "name": "System.Private.CoreLib.dll!0x007ffe42ff35dd",
+                              "value": 3,
+                              "children": [
+                                {
+                                  "name": "System.Private.CoreLib.dll!0x007ffe42ff3a20",
+                                  "value": 3,
+                                  "children": [
+                                    {
+                                      "name": "System.Text.Unicode.Utf16Utility.GetPointerToFirstInvalidChar(char*, int, ref long, ref int)",
+                                      "value": 1,
+                                      "children": [
+                                        {
+                                          "name": "System.Private.CoreLib.dll!0x007ffe42ff3b6a",
+                                          "value": 1,
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "name": "System.Private.CoreLib.dll!0x007ffe42ff363f",
+                              "value": 2,
+                              "children": [
+                                {
+                                  "name": "System.Private.CoreLib.dll!0x007ffe42ff429a",
+                                  "value": 2,
+                                  "children": [
+                                    {
+                                      "name": "System.Private.CoreLib.dll!0x007ffe42ff4391",
+                                      "value": 2,
+                                      "children": []
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "System.Private.CoreLib.dll!0x007ffe42ff2e89",
+                      "value": 1,
+                      "children": [
+                        {
+                          "name": "System.Private.CoreLib.dll!0x007ffe42ff4c1f",
+                          "value": 1,
+                          "children": [
+                            {
+                              "name": "System.Private.CoreLib.dll!0x007ffe42ff4cf3",
+                              "value": 1,
+                              "children": [
+                                {
+                                  "name": "System.Private.CoreLib.dll!0x007ffe42ff4d2e",
+                                  "value": 1,
+                                  "children": []
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "System.Private.CoreLib.dll!0x007ffe42ff2ebb",
+                      "value": 1,
+                      "children": [
+                        {
+                          "name": "System.Private.CoreLib.dll!0x007ffe42ff4d8d",
+                          "value": 1,
+                          "children": [
+                            {
+                              "name": "System.Private.CoreLib.dll!0x007ffe42ff055b",
+                              "value": 1,
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "System.Private.CoreLib.dll!0x007ffe42fefe7a",
+          "value": 5,
+          "children": [
+            {
+              "name": "System.Private.CoreLib.dll!0x007ffe42ff2a17",
+              "value": 5,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "System.Private.CoreLib.dll!0x007ffe42fefe65",
+          "value": 4,
+          "children": [
+            {
+              "name": "System.Private.CoreLib.dll!0x007ffe430683ac",
+              "value": 2,
+              "children": [
+                {
+                  "name": "System.Private.CoreLib.dll!0x007ffe43251c58",
+                  "value": 1,
+                  "children": []
+                },
+                {
+                  "name": "System.Private.CoreLib.dll!0x007ffe43251c13",
+                  "value": 1,
+                  "children": [
+                    {
+                      "name": "System.Private.CoreLib.dll!0x007ffe432508f8",
+                      "value": 1,
+                      "children": [
+                        {
+                          "name": "System.Private.CoreLib.dll!0x007ffe43250bf3",
+                          "value": 1,
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "0xfffff80329ab0003",
+          "value": 1,
+          "children": []
+        },
+        {
+          "name": "System.Private.CoreLib.dll!0x007ffe42fefe89",
+          "value": 1,
+          "children": [
+            {
+              "name": "System.Private.CoreLib.dll!0x007ffe42ff2a17",
+              "value": 1,
+              "children": [
+                {
+                  "name": "System.SpanHelpers.IndexOf(ref char, char, int)",
+                  "value": 1,
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "",
+      "value": 13,
+      "children": [
+        {
+          "name": "0xfffff8032cb33213",
+          "value": 1,
+          "children": []
+        }
+      ]
+    }
+  ]
+}
