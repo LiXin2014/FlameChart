@@ -1,4 +1,3 @@
-
 interface INode {
     name: string,
     value: number,
@@ -19,7 +18,7 @@ class FlameChart {
     private _cells: d3.Selection<SVGGElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
     private _rects: d3.Selection<SVGRectElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
     private _texts: d3.Selection<SVGTextElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
-    //private _spans: d3.Selection<SVGTSpanElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
+    private _spans: d3.Selection<SVGTSpanElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
     private _colorScale = d3.scaleOrdinal(d3.schemeCategory10);
     private _resizeTimeout: any = 0;
     private _isFlipped: boolean = false;
@@ -83,12 +82,11 @@ class FlameChart {
                 // size should be from 2em to 1em (root node to leave nodes)
                 var desiredSize = 2 * ((this._level - d.depth) / this._level);
                 return desiredSize < 1 ? "1em" : desiredSize + "em";
-            })
-            .text(d => d.data.name);
+            });
 
-        /*this._spans = this._texts.append('tspan')
+        this._spans = this._texts.append('tspan')
                 .text(function(d) { return d.data.name; })
-                .each((d, i, e) => this.wrap(d, i, e))*/
+                .each((d, i, e) => this.wrap(d, i, e));
 
         // Hook up search button
         const searchButton = document.getElementById("searchButton") as HTMLButtonElement;
@@ -103,8 +101,9 @@ class FlameChart {
         window.addEventListener("resize", () => this.onResize());
     }
 
-    /*private wrap(node: d3.HierarchyRectangularNode<INode>, index: number, elementGroup: SVGTSpanElement[] | ArrayLike<SVGTSpanElement>) {
+    private wrap(node: d3.HierarchyRectangularNode<INode>, index: number, elementGroup: SVGTSpanElement[] | ArrayLike<SVGTSpanElement>) {
         let tspanElement: SVGTSpanElement = elementGroup[index];
+        tspanElement.textContent = node.data.name;
         let textContent: string | null = tspanElement.textContent;
         let textLength: number = tspanElement.getComputedTextLength();
         let getWidth = (node: d3.HierarchyRectangularNode<INode>) => this.getScaleX(this._nodesWidth)(node.x1 - node.x0);
@@ -116,12 +115,12 @@ class FlameChart {
             return;
         }
 
-        while (textLength > (getWidth(node) - 2 * 2) && textLength > 0) {
+        while (textLength > width && textLength > 0) {
             textContent = textContent?.slice(0, -1) || null;
             tspanElement.textContent = textContent + '...';
             textLength = tspanElement.getComputedTextLength();
         }
-    }*/
+    }
 
     private getScaleX(nodesWidth: number) {
         return d3.scaleLinear().domain([0, nodesWidth]).range([0, this._width]);
@@ -159,9 +158,9 @@ class FlameChart {
                 .attr("x", (d: d3.HierarchyRectangularNode<INode>) => this.getScaleX(this._nodesWidth)(d.x1 - d.x0) / 2)
                 .attr("y", (d: d3.HierarchyRectangularNode<INode>) => this.getScaleY(this._nodesHeight)(d.y1 - d.y0) / 2);
 
-            /*this._spans
+            this._spans
                 .text(function(d) { return d.data.name; })
-                .each((d, i, e) => this.wrap(d, i, e));*/
+                .each((d, i, e) => this.wrap(d, i, e));
         }
 
         if (forceRender) {
@@ -209,9 +208,13 @@ class FlameChart {
             .attr("x", (d: any) => this.getScaleX(this._nodesWidth)(d.target.x1 - d.target.x0) / 2)
             .attr("y", (d: any) => this.getScaleY(this._nodesHeight)(d.target.y1 - d.target.y0) / 2);
 
-        /*this._spans.transition(t as any)
+        this._spans
+            .style("opacity", 0)
             .text(function(d) { return d.data.name; })
-            .each((d, i, e) => this.wrap(d, i, e));*/
+            .each((d, i, e) => this.wrap(d, i, e))
+            .transition()
+            .duration(750)
+            .style("opacity", 1);
     }
 
     private onMouseOver(event: Event, d: any) {
