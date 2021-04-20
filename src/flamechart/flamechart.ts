@@ -8,6 +8,7 @@ interface INode {
 class FlameChart {
     private _nodes: d3.HierarchyRectangularNode<INode>[];
     private _rootNode: d3.HierarchyRectangularNode<INode>;
+    private _level: number;
     private _currentFocus: d3.HierarchyRectangularNode<INode>;
     private _nodesWidth: number;
     private _nodesHeight: number;
@@ -41,6 +42,7 @@ class FlameChart {
         const partitioned = partitionLayout(sorted);
         this._nodes = partitioned.descendants();
         this._rootNode = this._nodes[0];
+        this._level = this._rootNode.height + 1;
 
         this._currentFocus = this._rootNode;
         this._nodesWidth = this._rootNode.x1 - this._rootNode.x0;
@@ -77,7 +79,11 @@ class FlameChart {
             .attr("y", d => this.getScaleY(this._nodesHeight)(d.y1 - d.y0) / 2)
             .attr("dy", "0.32em")
             .attr("text-anchor", d => "middle")
-            .attr("font-size", d => 3 - d.depth + "em")
+            .attr("font-size", d => {
+                // size should be from 2em to 1em (root node to leave nodes)
+                var desiredSize = 2 * ((this._level - d.depth) / this._level);
+                return desiredSize < 1 ? "1em" : desiredSize + "em";
+            })
             .text(d => d.data.name);
 
         /*this._spans = this._texts.append('tspan')
