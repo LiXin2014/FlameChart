@@ -26,7 +26,12 @@ class FlameChart {
     constructor(root: d3.HierarchyNode<INode>) {
         this._isFlipped = (document.getElementById("flip") as HTMLInputElement).checked;
 
-        const summed = root.sum((d: INode) => d.value);
+        // sum computes value for each node. node's value = whatever returns here + its children value total
+        const summed = root.sum((d: INode) => {
+            var childrenValueTotal = 0; 
+            d.children?.forEach((child: INode) => { childrenValueTotal += child.value; })
+            return d.value - childrenValueTotal;
+        });
         const sorted = summed.sort((a: d3.HierarchyNode<INode>, b: d3.HierarchyNode<INode>) => d3.descending(a.height, b.height) || d3.descending(a.value, b.value));
 
         this._width = document.body.clientWidth;
@@ -217,7 +222,7 @@ class FlameChart {
     }
 
     private onMouseMove(event: MouseEvent, d: d3.HierarchyRectangularNode<INode>) {
-        this._div.html(d.data.name)
+        this._div.html("name: " + d.data.name + "value: " + d.data.value)
             .style("left", event.clientX + "px")
             .style("top", event.clientY + "px");
     }
