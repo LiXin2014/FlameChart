@@ -36,8 +36,8 @@ class FlameChart {
         });
         const sorted = summed.sort((a: d3.HierarchyNode<INode>, b: d3.HierarchyNode<INode>) => d3.descending(a.height, b.height) || d3.descending(a.value, b.value));
 
-        this._width = document.body.clientWidth;
-        this._height = document.body.clientHeight /2;
+        this._width = 1900; // container width - 100
+        this._height = document.body.clientHeight > root.height * 15 ? document.body.clientHeight : root.height * 15 +100;  // take 15 as the minimum cell height
         const partitionLayout = d3.partition<INode>().size([this._height, this._width]).padding(2);
 
         const partitioned = partitionLayout(sorted);
@@ -264,9 +264,13 @@ class FlameChart {
     }
 
     private onMouseMove(event: MouseEvent, d: d3.HierarchyRectangularNode<INode>) {
+        let container: HTMLDivElement | null = document.querySelector('#container');
+        let scrollTop: number = container ? container.scrollTop : 0;
+        let scrollLeft: number = container ? container.scrollLeft : 0;
+
         this._div.html("<b>name:</b> " + d.data.name + ", <b>value:</b> " + d.data.value)
-            .style("left", event.clientX + "px")
-            .style("top", event.clientY + "px");
+            .style("left", event.clientX + scrollLeft +  "px")
+            .style("top", event.clientY + scrollTop + "px");
     }
 
     private onSearch() {
