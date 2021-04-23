@@ -9,7 +9,9 @@ html, body {
 
 div#container {
   position: relative;
-  height: 300px;
+  height: 1000px;
+  width: 2000px;
+  overflow: auto;
 }
 
 div.tooltip {
