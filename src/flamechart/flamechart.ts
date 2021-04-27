@@ -31,14 +31,14 @@ class FlameChart {
 
         // sum computes value for each node. node's value = whatever returns here + its children value total
         const summed = root.sum((d: INode) => {
-            var childrenValueTotal = 0; 
+            var childrenValueTotal = 0;
             d.children?.forEach((child: INode) => { childrenValueTotal += child.value; })
             return d.value - childrenValueTotal;
         });
         const sorted = summed.sort((a: d3.HierarchyNode<INode>, b: d3.HierarchyNode<INode>) => d3.descending(a.height, b.height) || d3.descending(a.value, b.value));
 
         this._width = 1900; // container width - 100
-        this._height = MinViewHeight > root.height * 15 ? MinViewHeight : root.height * 15 +100;  // take 15 as the minimum cell height
+        this._height = MinViewHeight > root.height * 15 ? MinViewHeight : root.height * 15 + 100;  // take 15 as the minimum cell height
         const partitionLayout = d3.partition<INode>().size([this._height, this._width]).padding(PADDING);
 
         const partitioned = partitionLayout(sorted);
@@ -60,13 +60,11 @@ class FlameChart {
             .selectAll<SVGGElement, INode>("g")
             .data(this._nodes)
             .join("g")
-            .attr("transform", d => `translate(${this.getScaleX(this._nodesWidth)(d.x0)},${this.getOffsetY(d)})`);
-            
+            .attr("transform", d => `translate(${this.getScaleX()(d.x0)},${this.getOffsetY(d)})`);
+
         this._rects = this._cells.append("rect")
-            .attr("width", d => this.getScaleX(this._nodesWidth)(d.x1 - d.x0))
-            .attr("height", d => {
-                return this.getRectHeight(d);
-            })
+            .attr("width", d => this.getRectWidth(d))
+            .attr("height", d => this.getRectHeight(d))
             .attr("fill-opacity", 0.6)
             .attr("tabindex", 0)
             .attr("aria-label", d => d.data.name)
@@ -78,42 +76,23 @@ class FlameChart {
             .on("mousemove", (e: MouseEvent, p: d3.HierarchyRectangularNode<INode>) => this.onMouseMove(e, p));
 
         this._texts = this._cells.append("text")
-            .attr("x", d => this.getScaleX(this._nodesWidth)(d.x1 - d.x0) / 2)
+            .attr("x", d => this.getRectWidth(d) / 2)
             .attr("y", d => this.getRectHeight(d) / 2)
             .attr("dy", "0.32em")
             .attr("text-anchor", d => "middle")
-            .attr("font-size", d => {
-                let rectHeight = this.getRectHeight(d);
-                if(rectHeight < 20) {
-                    return "1.2em";
-                }
-                else if(rectHeight < 30) {
-                    return "1.5em";
-                }
-                else if(rectHeight < 50) {
-                    return "2em";
-                }
-                return "2.5em";
-            });
+            .attr("font-size", d => this.getFontSize(d));
 
         this._spans = this._texts.append('tspan')
-                .text((d: d3.HierarchyRectangularNode<INode>) => { 
-                    let getWidth = (node: d3.HierarchyRectangularNode<INode>) => this.getScaleX(this._nodesWidth)(node.x1 - node.x0);
-                    let width = (getWidth(d) - 2 * 2);
-                    if(width < MaxWidth) {
-                        return "";
-                    }
-                    return d.data.name; 
-                })
-                .each((d, i, e) => this.wrap(d, i, e));
+            .text((d: d3.HierarchyRectangularNode<INode>) => this.getRectText(d))
+            .each((d, i, e) => this.wrap(d, i, e));
 
         // Hook up search button
         const searchButton = document.getElementById("searchButton") as HTMLButtonElement;
         searchButton.addEventListener("click", () => this.onSearch());
 
-         // Hook up reset zoom button
-         const resetZoomButton = document.getElementById("resetZoomButton") as HTMLButtonElement;
-         resetZoomButton.addEventListener("click", () => this.onClicked(this._rootNode));
+        // Hook up reset zoom button
+        const resetZoomButton = document.getElementById("resetZoomButton") as HTMLButtonElement;
+        resetZoomButton.addEventListener("click", () => this.onClicked(this._rootNode));
 
         document.getElementById("flip")?.addEventListener("click", () => this.onFlip());
 
@@ -126,16 +105,15 @@ class FlameChart {
         let tspanElement: SVGTSpanElement = elementGroup[index];
         let textContent: string | null = tspanElement.textContent;
         let textLength: number = tspanElement.getComputedTextLength();
-        let getWidth = (node: d3.HierarchyRectangularNode<INode>) => this.getScaleX(this._nodesWidth)(node.x1 - node.x0);
-        let width = (getWidth(node) - 2 * 2);
+        let width = (this.getRectWidth(node)- 2 * 2);
 
         // If the width is less than 20px, don't show function name.
-        if(width < MaxWidth) {
+        if (width < MaxWidth) {
             tspanElement.textContent = '';
             return;
         }
 
-        if(textLength < width) {
+        if (textLength < width) {
             return;
         }
 
@@ -144,8 +122,30 @@ class FlameChart {
         tspanElement.textContent = textContent + '...';
     }
 
-    private getScaleX(nodesWidth: number) {
-        return d3.scaleLinear().domain([0, nodesWidth]).range([0, this._width]);
+    private getFontSize(node: d3.HierarchyRectangularNode<INode>) {
+        let rectHeight = this.getRectHeight(node);
+        if (rectHeight < 20) {
+            return "1.2em";
+        }
+        else if (rectHeight < 30) {
+            return "1.5em";
+        }
+        else if (rectHeight < 50) {
+            return "2em";
+        }
+        return "2.5em";
+    }
+
+    private getRectText(node: d3.HierarchyRectangularNode<INode>) {
+        let width = (this.getRectWidth(node) - 2 * 2);
+        if (width < MaxWidth) {
+            return "";
+        }
+        return node.data.name;
+    }
+
+    private getScaleX() {
+        return d3.scaleLinear().domain([0, this._nodesWidth]).range([0, this._width]);
     }
 
     private getScaleY() {
@@ -154,6 +154,10 @@ class FlameChart {
 
     private getRectHeight(node: d3.HierarchyRectangularNode<INode>) {
         return this.getScaleY()(node.y1 - node.y0);
+    }
+
+    private getRectWidth(node: d3.HierarchyRectangularNode<INode>) {
+        return this.getScaleX()(node.x1 - node.x0);
     }
 
     private colorScale(value: string) {
@@ -171,26 +175,19 @@ class FlameChart {
                 .attr("width", this._width).attr("height", this._height);
 
             this._cells
-                .attr("transform", (d: d3.HierarchyRectangularNode<INode>) => `translate(${this.getScaleX(this._nodesWidth)(d.x0)},${this.getOffsetY(d)})`);
+                .attr("transform", (d: d3.HierarchyRectangularNode<INode>) => `translate(${this.getScaleX()(d.x0)},${this.getOffsetY(d)})`);
 
             this._rects
-                .attr("width", (d: d3.HierarchyRectangularNode<INode>) => this.getScaleX(this._nodesWidth)(d.x1 - d.x0))
+                .attr("width", (d: d3.HierarchyRectangularNode<INode>) => this.getRectWidth(d))
                 .attr("height", (d: d3.HierarchyRectangularNode<INode>) => this.getRectHeight(d));
 
             this._texts
-                .attr("x", (d: d3.HierarchyRectangularNode<INode>) => this.getScaleX(this._nodesWidth)(d.x1 - d.x0) / 2)
+                .attr("x", (d: d3.HierarchyRectangularNode<INode>) => this.getRectWidth(d) / 2)
                 .attr("y", (d: d3.HierarchyRectangularNode<INode>) => this.getRectHeight(d) / 2);
 
             this._spans
-            .text((d: d3.HierarchyRectangularNode<INode>) => { 
-                let getWidth = (node: d3.HierarchyRectangularNode<INode>) => this.getScaleX(this._nodesWidth)(node.x1 - node.x0);
-                let width = (getWidth(d) - 2 * 2);
-                if(width < MaxWidth) {
-                    return "";
-                }
-                return d.data.name; 
-            })
-            .each((d, i, e) => this.wrap(d, i, e));
+                .text((d: d3.HierarchyRectangularNode<INode>) => this.getRectText(d))
+                .each((d, i, e) => this.wrap(d, i, e));
         }
 
         if (forceRender) {
@@ -220,7 +217,7 @@ class FlameChart {
         this._nodesWidth = p.x1 - p.x0;
         this._nodesHeight = (p.y1 - p.y0) * (p.height + 1);
         // reset this._height so rect height will scale accordingly.
-        this._height = MinViewHeight > p.height * 15 ? MinViewHeight : p.height * 15 +100; 
+        this._height = MinViewHeight > p.height * 15 ? MinViewHeight : p.height * 15 + 100;
         // reset svg height so the scroll bar can go away.
         this._svg.attr("height", this._height);
 
@@ -231,38 +228,21 @@ class FlameChart {
             d.y1 = d.y1 - rooty0;
         });
 
-    const t = this._cells.transition()
-        .duration(750)
-        .attr("transform", (d: d3.HierarchyRectangularNode<INode>) => {
-            //console.log(`${d.data.name} translate to...  (${this.getScaleX(this._nodesWidth)(d.x0)} ,${this.getOffsetY(d)})`);
-            return `translate(${this.getScaleX(this._nodesWidth)(d.x0)},${this.getOffsetY(d)})`;
-        });
+        const t = this._cells.transition()
+            .duration(750)
+            .attr("transform", (d: d3.HierarchyRectangularNode<INode>) => `translate(${this.getScaleX()(d.x0)},${this.getOffsetY(d)})`);
 
-    this._rects.transition(t as any)
-        .attr("width", (d: d3.HierarchyRectangularNode<INode>) => {
-            console.log(`${d.data.name} width...  (${this.getScaleX(this._nodesWidth)(d.x1 - d.x0)})   with x0 being ${d.x0}, x1 being ${d.x1}`);
-            //return this.getScaleX(this._nodesWidth)(d.x1 - d.x0 + PADDING * this._nodesWidth / this._width);
-            return this.getScaleX(this._nodesWidth)(d.x1 - d.x0);
-        })
-        .attr("height", (d: d3.HierarchyRectangularNode<INode>) => {
-            //console.log(`${d.data.name} height...  (${this.getRectHeight(d)})`);
-            return this.getRectHeight(d);
-        });
+        this._rects.transition(t as any)
+            .attr("width", (d: d3.HierarchyRectangularNode<INode>) => this.getRectWidth(d))
+            .attr("height", (d: d3.HierarchyRectangularNode<INode>) => this.getRectHeight(d));
 
-    this._texts.transition(t as any)
-        .attr("x", (d: d3.HierarchyRectangularNode<INode>) => this.getScaleX(this._nodesWidth)(d.x1 - d.x0) / 2)
-        .attr("y", (d: d3.HierarchyRectangularNode<INode>) => this.getScaleY()(d.y1 - d.y0) / 2);
+        this._texts.transition(t as any)
+            .attr("x", (d: d3.HierarchyRectangularNode<INode>) => this.getRectWidth(d) / 2)
+            .attr("y", (d: d3.HierarchyRectangularNode<INode>) => this.getScaleY()(d.y1 - d.y0) / 2);
 
         this._spans
             .style("opacity", 0)
-            .text((d: d3.HierarchyRectangularNode<INode>) => { 
-                let getWidth = (node: d3.HierarchyRectangularNode<INode>) => this.getScaleX(this._nodesWidth)(node.x1 - node.x0);
-                let width = (getWidth(d) - 2 * 2);
-                if(width < MaxWidth) {
-                    return "";
-                }
-                return d.data.name; 
-            })
+            .text((d: d3.HierarchyRectangularNode<INode>) => this.getRectText(d))
             .each((d, i, e) => this.wrap(d, i, e))
             .transition()
             .duration(750)
@@ -288,7 +268,7 @@ class FlameChart {
         let scrollLeft: number = container ? container.scrollLeft : 0;
 
         this._div.html("<b>name:</b> " + d.data.name + ", <b>value:</b> " + d.data.value)
-            .style("left", event.clientX + scrollLeft +  "px")
+            .style("left", event.clientX + scrollLeft + "px")
             .style("top", event.clientY + scrollTop + "px");
     }
 
