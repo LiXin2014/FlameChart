@@ -6,11 +6,11 @@ interface INode {
 
 const MaxWidth: number = 20;  // maximum text width for rect title.
 const MinViewHeight: number = 1000;   // maximum view port height, scrolling comes in if height exceeds 1000px
+const PADDING: number = 1;   // the node with value equals to padding will not show up (Is it fine?). Since the function for computing rect width is based on x1 - x0.
 
 class FlameChart {
     private _nodes: d3.HierarchyRectangularNode<INode>[];
     private _rootNode: d3.HierarchyRectangularNode<INode>;
-    private _level: number;
     private _currentFocus: d3.HierarchyRectangularNode<INode>;
     private _nodesWidth: number;
     private _nodesHeight: number;
@@ -21,7 +21,7 @@ class FlameChart {
     private _cells: d3.Selection<SVGGElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
     private _rects: d3.Selection<SVGRectElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
     private _texts: d3.Selection<SVGTextElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
-    //private _spans: d3.Selection<SVGTSpanElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
+    private _spans: d3.Selection<SVGTSpanElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
     private _colorScale = d3.scaleOrdinal(d3.schemeCategory10);
     private _resizeTimeout: any = 0;
     private _isFlipped: boolean = false;
@@ -39,12 +39,11 @@ class FlameChart {
 
         this._width = 1900; // container width - 100
         this._height = MinViewHeight > root.height * 15 ? MinViewHeight : root.height * 15 +100;  // take 15 as the minimum cell height
-        const partitionLayout = d3.partition<INode>().size([this._height, this._width]).padding(1);
+        const partitionLayout = d3.partition<INode>().size([this._height, this._width]).padding(PADDING);
 
         const partitioned = partitionLayout(sorted);
         this._nodes = partitioned.descendants();
         this._rootNode = this._nodes[0];
-        this._level = this._rootNode.height + 1;
 
         this._currentFocus = this._rootNode;
         this._nodesWidth = this._rootNode.x1 - this._rootNode.x0;
@@ -84,12 +83,20 @@ class FlameChart {
             .attr("dy", "0.32em")
             .attr("text-anchor", d => "middle")
             .attr("font-size", d => {
-                // size should be from 2em to 1em (root node to leave nodes)
-                var desiredSize = 2 * ((this._level - d.depth) / this._level);
-                return desiredSize < 1 ? "1em" : desiredSize + "em";
+                let rectHeight = this.getRectHeight(d);
+                if(rectHeight < 20) {
+                    return "1.2em";
+                }
+                else if(rectHeight < 30) {
+                    return "1.5em";
+                }
+                else if(rectHeight < 50) {
+                    return "2em";
+                }
+                return "2.5em";
             });
 
-        /*this._spans = this._texts.append('tspan')
+        this._spans = this._texts.append('tspan')
                 .text((d: d3.HierarchyRectangularNode<INode>) => { 
                     let getWidth = (node: d3.HierarchyRectangularNode<INode>) => this.getScaleX(this._nodesWidth)(node.x1 - node.x0);
                     let width = (getWidth(d) - 2 * 2);
@@ -97,8 +104,8 @@ class FlameChart {
                         return "";
                     }
                     return d.data.name; 
-                });*/
-                //.each((d, i, e) => this.wrap(d, i, e));
+                })
+                .each((d, i, e) => this.wrap(d, i, e));
 
         // Hook up search button
         const searchButton = document.getElementById("searchButton") as HTMLButtonElement;
@@ -113,9 +120,10 @@ class FlameChart {
         window.addEventListener("resize", () => this.onResize());
     }
 
-    /*private wrap(node: d3.HierarchyRectangularNode<INode>, index: number, elementGroup: SVGTSpanElement[] | ArrayLike<SVGTSpanElement>) {
+    private wrap(node: d3.HierarchyRectangularNode<INode>, index: number, elementGroup: SVGTSpanElement[] | ArrayLike<SVGTSpanElement>) {
+        // W or M has the widest length 19 when font size is 1.5em.
+        let letterWidestLength: number = 19;
         let tspanElement: SVGTSpanElement = elementGroup[index];
-        tspanElement.textContent = node.data.name;
         let textContent: string | null = tspanElement.textContent;
         let textLength: number = tspanElement.getComputedTextLength();
         let getWidth = (node: d3.HierarchyRectangularNode<INode>) => this.getScaleX(this._nodesWidth)(node.x1 - node.x0);
@@ -127,12 +135,14 @@ class FlameChart {
             return;
         }
 
-        while (textLength > width && textLength > 0) {
-            textContent = textContent?.slice(0, -1) || null;
-            tspanElement.textContent = textContent + '...';
-            textLength = tspanElement.getComputedTextLength();
+        if(textLength < width) {
+            return;
         }
-    }*/
+
+        let numOfLetters = width / letterWidestLength;
+        textContent = textContent?.slice(0, numOfLetters) || null;
+        tspanElement.textContent = textContent + '...';
+    }
 
     private getScaleX(nodesWidth: number) {
         return d3.scaleLinear().domain([0, nodesWidth]).range([0, this._width]);
@@ -171,7 +181,7 @@ class FlameChart {
                 .attr("x", (d: d3.HierarchyRectangularNode<INode>) => this.getScaleX(this._nodesWidth)(d.x1 - d.x0) / 2)
                 .attr("y", (d: d3.HierarchyRectangularNode<INode>) => this.getRectHeight(d) / 2);
 
-            /*this._spans
+            this._spans
             .text((d: d3.HierarchyRectangularNode<INode>) => { 
                 let getWidth = (node: d3.HierarchyRectangularNode<INode>) => this.getScaleX(this._nodesWidth)(node.x1 - node.x0);
                 let width = (getWidth(d) - 2 * 2);
@@ -179,8 +189,8 @@ class FlameChart {
                     return "";
                 }
                 return d.data.name; 
-            });*/
-                //.each((d, i, e) => this.wrap(d, i, e));
+            })
+            .each((d, i, e) => this.wrap(d, i, e));
         }
 
         if (forceRender) {
@@ -230,7 +240,8 @@ class FlameChart {
 
     this._rects.transition(t as any)
         .attr("width", (d: d3.HierarchyRectangularNode<INode>) => {
-            //console.log(`${d.data.name} width...  (${this.getScaleX(this._nodesWidth)(d.x1 - d.x0)})`);
+            console.log(`${d.data.name} width...  (${this.getScaleX(this._nodesWidth)(d.x1 - d.x0)})   with x0 being ${d.x0}, x1 being ${d.x1}`);
+            //return this.getScaleX(this._nodesWidth)(d.x1 - d.x0 + PADDING * this._nodesWidth / this._width);
             return this.getScaleX(this._nodesWidth)(d.x1 - d.x0);
         })
         .attr("height", (d: d3.HierarchyRectangularNode<INode>) => {
@@ -242,7 +253,7 @@ class FlameChart {
         .attr("x", (d: d3.HierarchyRectangularNode<INode>) => this.getScaleX(this._nodesWidth)(d.x1 - d.x0) / 2)
         .attr("y", (d: d3.HierarchyRectangularNode<INode>) => this.getScaleY()(d.y1 - d.y0) / 2);
 
-        /*this._spans
+        this._spans
             .style("opacity", 0)
             .text((d: d3.HierarchyRectangularNode<INode>) => { 
                 let getWidth = (node: d3.HierarchyRectangularNode<INode>) => this.getScaleX(this._nodesWidth)(node.x1 - node.x0);
@@ -252,10 +263,10 @@ class FlameChart {
                 }
                 return d.data.name; 
             })
-            //.each((d, i, e) => this.wrap(d, i, e))
+            .each((d, i, e) => this.wrap(d, i, e))
             .transition()
             .duration(750)
-            .style("opacity", 1);*/
+            .style("opacity", 1);
     }
 
     private onMouseOver(event: Event, d: d3.HierarchyRectangularNode<INode>) {
