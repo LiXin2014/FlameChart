@@ -1,6 +1,9 @@
+import {Color} from './color.js';
+
 interface INode {
     name: string,
     value: number,
+    type: string,
     children: INode[]
 }
 
@@ -68,7 +71,10 @@ class FlameChart {
             .attr("fill-opacity", 0.6)
             .attr("tabindex", 0)
             .attr("aria-label", d => d.data.name)
-            .attr("fill", d => this.colorScale((d.children ? d : d.parent)!.data.name))
+            .attr("fill", d => {
+                return Color.colorHash(d.data.name, d.data.type);
+                //return this.colorScale((d.children ? d : d.parent)!.data.name);
+            })
             .style("cursor", "pointer")
             .on("click", (e: Event, p: d3.HierarchyRectangularNode<INode>) => this.onClicked(p))
             .on("mouseover", (e: Event, p: d3.HierarchyRectangularNode<INode>) => this.onMouseOver(e, p))
@@ -297,9 +303,8 @@ class FlameChart {
     }
 }
 
-let flameChart: FlameChart;
 async function initialize() {
-    const data: any = await d3.json("PrimeVisualizer.json");
-    flameChart = new FlameChart(d3.hierarchy(data));
+    const data: any = await d3.json("fakedata.json");
+    new FlameChart(d3.hierarchy(data));
 }
 initialize();
