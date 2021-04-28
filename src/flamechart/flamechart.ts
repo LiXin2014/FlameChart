@@ -304,7 +304,7 @@ class FlameChart {
 }
 
 async function initialize() {
-    const data: any = await d3.json("fakedata.json");
+    const data: any = await d3.json("PrimeVisualizer.json");
     new FlameChart(d3.hierarchy(data));
 }
 initialize();
