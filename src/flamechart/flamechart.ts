@@ -9,7 +9,6 @@ interface INode {
 
 const MaxWidth: number = 20;  // maximum text width for rect title.
 const MinViewHeight: number = 1000;   // maximum view port height, scrolling comes in if height exceeds 1000px
-const PADDING: number = 1;   // the node with value equals to padding will not show up (Is it fine?). Since the function for computing rect width is based on x1 - x0.
 
 class FlameChart {
     private _nodes: d3.HierarchyRectangularNode<INode>[];
@@ -25,7 +24,6 @@ class FlameChart {
     private _rects: d3.Selection<SVGRectElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
     private _texts: d3.Selection<SVGTextElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
     private _spans: d3.Selection<SVGTSpanElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
-    private _colorScale = d3.scaleOrdinal(d3.schemeCategory10);
     private _resizeTimeout: any = 0;
     private _isFlipped: boolean = false;
 
@@ -42,7 +40,7 @@ class FlameChart {
 
         this._width = 1900; // container width - 100
         this._height = MinViewHeight > root.height * 15 ? MinViewHeight : root.height * 15 + 100;  // take 15 as the minimum cell height
-        const partitionLayout = d3.partition<INode>().size([this._height, this._width]).padding(PADDING);
+        const partitionLayout = d3.partition<INode>().size([this._height, this._width]).padding(0);  // padding introduces a lot problems. missing cells, too big gap when zoomed in. So instead of using padding, use strokewidth around rect to achieve padding look.
 
         const partitioned = partitionLayout(sorted);
         this._nodes = partitioned.descendants();
@@ -63,7 +61,9 @@ class FlameChart {
             .selectAll<SVGGElement, INode>("g")
             .data(this._nodes)
             .join("g")
-            .attr("transform", d => `translate(${this.getScaleX()(d.x0)},${this.getOffsetY(d)})`);
+            .attr("transform", d => {
+                return `translate(${this.getScaleX()(d.x0)},${this.getOffsetY(d)})`;
+            })
 
         this._rects = this._cells.append("rect")
             .attr("width", d => this.getRectWidth(d))
@@ -73,8 +73,9 @@ class FlameChart {
             .attr("aria-label", d => d.data.name)
             .attr("fill", d => {
                 return Color.colorHash(d.data.name, d.data.type);
-                //return this.colorScale((d.children ? d : d.parent)!.data.name);
             })
+            .attr("stroke-width", 1)
+            .attr("stroke", "rgb(255, 255, 255)")
             .style("cursor", "pointer")
             .on("click", (e: Event, p: d3.HierarchyRectangularNode<INode>) => this.onClicked(p))
             .on("mouseover", (e: Event, p: d3.HierarchyRectangularNode<INode>) => this.onMouseOver(e, p))
@@ -86,7 +87,7 @@ class FlameChart {
             .attr("y", d => this.getRectHeight(d) / 2)
             .attr("dy", "0.32em")
             .attr("text-anchor", d => "middle")
-            .attr("font-size", d => this.getFontSize(d));
+            .attr("font-size", d => this.getFontSize(d))
 
         this._spans = this._texts.append('tspan')
             .text((d: d3.HierarchyRectangularNode<INode>) => this.getRectText(d))
@@ -164,10 +165,6 @@ class FlameChart {
 
     private getRectWidth(node: d3.HierarchyRectangularNode<INode>) {
         return this.getScaleX()(node.x1 - node.x0);
-    }
-
-    private colorScale(value: string) {
-        return this._colorScale(value);
     }
 
     private getOffsetY(d: d3.HierarchyRectangularNode<INode>) {
@@ -293,7 +290,7 @@ class FlameChart {
         this._rects.transition()
             .duration(750)
             .attr("fill", (d: any) => {
-                return d.highlighted ? "red" : this.colorScale((d.children ? d : d.parent).data.name);
+                return d.highlighted ? "red" : Color.colorHash(d.data.name, d.data.type);
             });
     }
 
