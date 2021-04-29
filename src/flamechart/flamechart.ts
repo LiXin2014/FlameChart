@@ -107,6 +107,10 @@ class FlameChart {
     }
 
     private wrap(node: d3.HierarchyRectangularNode<INode>, index: number, elementGroup: SVGTSpanElement[] | ArrayLike<SVGTSpanElement>) {
+        if(this.hideRect(node)) {
+            return;
+        }
+
         // W or M has the widest length 19 when font size is 1.5em.
         let letterWidestLength: number = 19;
         let tspanElement: SVGTSpanElement = elementGroup[index];
@@ -141,6 +145,10 @@ class FlameChart {
             return "2em";
         }
         return "2.5em";
+    }
+
+    private hideRect(node: d3.HierarchyRectangularNode<INode>) : boolean {
+        return node.x1 <=0 || node.y1 <= 0;
     }
 
     private getRectText(node: d3.HierarchyRectangularNode<INode>) {
@@ -245,7 +253,7 @@ class FlameChart {
 
         this._spans
             .style("opacity", 0)
-            .text((d: d3.HierarchyRectangularNode<INode>) => this.getRectText(d))
+            .text((d: d3.HierarchyRectangularNode<INode>) => this.hideRect(d) ? "" : this.getRectText(d))
             .each((d, i, e) => this.wrap(d, i, e))
             .transition()
             .duration(750)
