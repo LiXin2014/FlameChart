@@ -9,7 +9,7 @@ interface INode {
     children: INode[]
 }
 
-const MaxWidth: number = 20;  // maximum text width for rect title.
+const MaxWidth: number = 40;  // maximum text width for rect title.
 const MinViewHeight: number = 1000;   // maximum view port height, scrolling comes in if height exceeds 1000px
 
 class FlameChart {
@@ -20,6 +20,7 @@ class FlameChart {
     private _nodesHeight: number;
     private _width: number;
     private _height: number;
+    private _letterLength: number = 0;
     private _div: d3.Selection<HTMLDivElement, any, HTMLElement, any>;
     private _svg: d3.Selection<SVGElement, INode, HTMLElement, any>;
     private _cells: d3.Selection<SVGGElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
@@ -89,6 +90,7 @@ class FlameChart {
             .attr("y", d => this.getRectHeight(d) / 2)
             .attr("dy", "0.32em")
             .attr("text-anchor", d => "middle")
+            .attr("font-family", "Monospace")   // use Monospace so each character takes same space.
             .attr("font-size", d => this.getFontSize(d))
 
         this._spans = this._texts.append('tspan')
@@ -108,30 +110,41 @@ class FlameChart {
         window.addEventListener("resize", () => this.onResize());
     }
 
+    private getLetterLength(): number {
+        if(this._letterLength !== 0) {
+            return this._letterLength;
+        }
+        let text: SVGTextElement = this._texts.nodes()[0];
+        let textContent: string | null = text.textContent;
+        let textLength: number = text.getComputedTextLength();
+        this._letterLength = textContent ? textLength / textContent.length : 0;
+        return Math.ceil(this._letterLength);
+    }
+
     private wrap(node: d3.HierarchyRectangularNode<INode>, index: number, elementGroup: SVGTSpanElement[] | ArrayLike<SVGTSpanElement>) {
         if(this.hideRect(node)) {
             return;
         }
 
-        // W or M has the widest length 19 when font size is 1.5em.
-        let letterWidestLength: number = 19;
+        let letterLength: number = this.getLetterLength();
         let tspanElement: SVGTSpanElement = elementGroup[index];
-        let textContent: string | null = tspanElement.textContent;
-        let textLength: number = tspanElement.getComputedTextLength();
         let width = (this.getRectWidth(node)- 2 * 2);
 
-        // If the width is less than 20px, don't show function name.
+        // If the width is less than 40px, don't show function name.
         if (width < MaxWidth) {
             tspanElement.textContent = '';
             return;
         }
 
+        let textContent: string | null = tspanElement.textContent;
+        let textLength: number = textContent ? textContent.length * letterLength : 0;
+
         if (textLength < width) {
             return;
         }
 
-        let numOfLetters = width / letterWidestLength;
-        textContent = textContent?.slice(0, numOfLetters) || null;
+        let numOfLetters = width / letterLength - 3;
+        textContent = textContent?.slice(0, numOfLetters) || "";
         tspanElement.textContent = textContent + '...';
     }
 
@@ -217,12 +230,14 @@ class FlameChart {
     }
 
     private onZoom(p: d3.HierarchyRectangularNode<INode>) {
+        var startTime = new Date().getTime();
         this._currentFocus = this._currentFocus === p ? p = p.parent ?? p : p;
         
         if (!p) {
             return;
         }
 
+        this._letterLength = 0;
         this.hideSiblings(p);
         this.show(p);
         this.fadeAncestors(p);
@@ -265,6 +280,11 @@ class FlameChart {
             .transition()
             .duration(750)
             .style("opacity", 1);
+        
+        var endTime = new Date().getTime();
+        console.log("startTime: ", startTime);
+        console.log("endTime", endTime);
+        console.log("elapsed: ", endTime - startTime);
     }
 
     private hideSiblings(node: d3.HierarchyRectangularNode<INode>) {
@@ -302,56 +322,8 @@ class FlameChart {
             this.fadeAncestors(d.parent)
         }
     }
-
-
-    /*private onClicked(p: d3.HierarchyRectangularNode<INode>) {
-        // p became the new root.
-        this._currentFocus = this._currentFocus === p ? p = p.parent ?? p : p;
-
-        if (!p) {
-            return;
-        }
-
-        let rootx0 = p.x0;
-        let rooty0 = p.y0;
-
-        this._nodesWidth = p.x1 - p.x0;
-        this._nodesHeight = (p.y1 - p.y0) * (p.height + 1);
-        // reset this._height so rect height will scale accordingly.
-        this._height = MinViewHeight > p.height * 15 ? MinViewHeight : p.height * 15 + 100;
-        // reset svg height so the scroll bar can go away.
-        this._svg.attr("height", this._height);
-
-        this._rootNode.each((d: d3.HierarchyRectangularNode<INode>) => {
-            d.x0 = d.x0 - rootx0;
-            d.x1 = d.x1 - rootx0;
-            d.y0 = d.y0 - rooty0;
-            d.y1 = d.y1 - rooty0;
-        });
-
-        const t = this._cells.transition()
-            .duration(750)
-            .attr("transform", (d: d3.HierarchyRectangularNode<INode>) => `translate(${this.getScaleX()(d.x0)},${this.getOffsetY(d)})`);
-
-        this._rects.transition(t as any)
-            .attr("width", (d: d3.HierarchyRectangularNode<INode>) => this.getRectWidth(d))
-            .attr("height", (d: d3.HierarchyRectangularNode<INode>) => this.getRectHeight(d));
-
-        this._texts.transition(t as any)
-            .attr("x", (d: d3.HierarchyRectangularNode<INode>) => this.getRectWidth(d) / 2)
-            .attr("y", (d: d3.HierarchyRectangularNode<INode>) => this.getScaleY()(d.y1 - d.y0) / 2);
-
-        this._spans
-            .style("opacity", 0)
-            .text((d: d3.HierarchyRectangularNode<INode>) => this.hideRect(d) ? "" : this.getRectText(d))
-            .each((d, i, e) => this.wrap(d, i, e))
-            .transition()
-            .duration(750)
-            .style("opacity", 1);
-    }*/
-
+   
     private onMouseOver(event: Event, d: d3.HierarchyRectangularNode<INode>) {
-
         this._div.transition()
             .duration(200)
             .style("opacity", .9);
