@@ -4,6 +4,8 @@ interface INode {
     name: string,
     value: number,
     type: string,
+    hide: boolean,
+    fade: boolean,
     children: INode[]
 }
 
@@ -77,7 +79,7 @@ class FlameChart {
             .attr("stroke-width", 1)
             .attr("stroke", "rgb(255, 255, 255)")
             .style("cursor", "pointer")
-            .on("click", (e: Event, p: d3.HierarchyRectangularNode<INode>) => this.onClicked(p))
+            .on("click", (e: Event, p: d3.HierarchyRectangularNode<INode>) => this.onZoom(p))
             .on("mouseover", (e: Event, p: d3.HierarchyRectangularNode<INode>) => this.onMouseOver(e, p))
             .on("mouseout", (e: Event, p: d3.HierarchyRectangularNode<INode>) => this.onMouseOut(e, p))
             .on("mousemove", (e: MouseEvent, p: d3.HierarchyRectangularNode<INode>) => this.onMouseMove(e, p));
@@ -99,7 +101,7 @@ class FlameChart {
 
         // Hook up reset zoom button
         const resetZoomButton = document.getElementById("resetZoomButton") as HTMLButtonElement;
-        resetZoomButton.addEventListener("click", () => this.onClicked(this._rootNode));
+        resetZoomButton.addEventListener("click", () => this.onZoom(this._rootNode));
 
         document.getElementById("flip")?.addEventListener("click", () => this.onFlip());
 
@@ -214,7 +216,95 @@ class FlameChart {
         this._resizeTimeout = setTimeout(() => render(), 100);
     }
 
-    private onClicked(p: d3.HierarchyRectangularNode<INode>) {
+    private onZoom(p: d3.HierarchyRectangularNode<INode>) {
+        this._currentFocus = this._currentFocus === p ? p = p.parent ?? p : p;
+        
+        if (!p) {
+            return;
+        }
+
+        this.hideSiblings(p);
+        this.show(p);
+        this.fadeAncestors(p);
+
+        let rootx0 = p.x0;
+
+        this._nodesWidth = p.x1 - p.x0;
+
+        this._rootNode.each((d: d3.HierarchyRectangularNode<INode>) => {
+            /*if(d.data.fade) {
+                d.x0 = 0;
+                d.x1 = this._width;
+            }*/
+            d.x0 = d.x0 - rootx0;
+            d.x1 = d.x1 - rootx0;
+        });
+
+        const t = this._cells.transition()
+            .duration(750)
+            .attr("transform", (d: d3.HierarchyRectangularNode<INode>) => `translate(${this.getScaleX()(d.x0)},${this.getOffsetY(d)})`);
+
+        this._rects.transition(t as any)
+            .attr("width", (d: d3.HierarchyRectangularNode<INode>) => this.getRectWidth(d))
+            .attr("height", (d: d3.HierarchyRectangularNode<INode>) => this.getRectHeight(d))
+            /*.attr("fill", (d: d3.HierarchyRectangularNode<INode>) => {
+                return d.data.fade ? "gray": Color.colorHash(d.data.name, d.data.type);
+            });*/
+            .style("opacity", (d: d3.HierarchyRectangularNode<INode>) => d.data.fade ? 0.5 : 1);
+
+        this._texts.transition(t as any)
+            .attr("x", (d: d3.HierarchyRectangularNode<INode>) => {
+                return d.data.fade ? this._width / 2 - this.getScaleX()(d.x0) : this.getRectWidth(d) / 2;
+            })
+            .attr("y", (d: d3.HierarchyRectangularNode<INode>) => this.getScaleY()(d.y1 - d.y0) / 2);
+
+        this._spans
+            .style("opacity", 0)
+            .text((d: d3.HierarchyRectangularNode<INode>) => this.hideRect(d) ? "" : this.getRectText(d))
+            .each((d, i, e) => this.wrap(d, i, e))
+            .transition()
+            .duration(750)
+            .style("opacity", 1);
+    }
+
+    private hideSiblings(node: d3.HierarchyRectangularNode<INode>) {
+        let child: d3.HierarchyRectangularNode<INode> = node;
+        let parent: d3.HierarchyRectangularNode<INode> | null = child.parent;
+        let children: d3.HierarchyRectangularNode<INode>[] | undefined, i: number, sibling: d3.HierarchyRectangularNode<INode>;
+        while (parent) {
+            children = parent.children;
+            if(children === undefined) {
+                children = [];
+            }
+            i = children.length;
+            while (i--) {
+                sibling = children[i];
+                if (sibling !== child) {
+                    sibling.data.hide = true;
+                }
+            }
+            child = parent;
+            parent = child.parent;
+        }
+    }
+
+    private show(d: d3.HierarchyRectangularNode<INode>) {
+        d.data.fade = false
+        d.data.hide = false
+        if (d.children) {
+            d.children.forEach((d: d3.HierarchyRectangularNode<INode>) => this.show(d));
+        }
+    }
+
+    private fadeAncestors (d: d3.HierarchyRectangularNode<INode>) {
+        if (d.parent) {
+            d.parent.data.fade = true
+            this.fadeAncestors(d.parent)
+        }
+    }
+
+
+    /*private onClicked(p: d3.HierarchyRectangularNode<INode>) {
         // p became the new root.
         this._currentFocus = this._currentFocus === p ? p = p.parent ?? p : p;
 
@@ -258,7 +348,7 @@ class FlameChart {
             .transition()
             .duration(750)
             .style("opacity", 1);
-    }
+    }*/
 
     private onMouseOver(event: Event, d: d3.HierarchyRectangularNode<INode>) {
 
