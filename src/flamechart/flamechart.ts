@@ -18,6 +18,7 @@ class FlameChart {
     private _currentFocus: d3.HierarchyRectangularNode<INode>;
     private _nodesWidth: number;
     private _nodesHeight: number;
+    private _rectHeight: number = 0;
     private _width: number;
     private _height: number;
     private _letterLength: number = 0;
@@ -48,10 +49,11 @@ class FlameChart {
         const partitioned = partitionLayout(sorted);
         this._nodes = partitioned.descendants();
         this._rootNode = this._nodes[0];
-
+        
         this._currentFocus = this._rootNode;
         this._nodesWidth = this._rootNode.x1 - this._rootNode.x0;
         this._nodesHeight = (this._rootNode.y1 - this._rootNode.y0) * (this._rootNode.height + 1);
+        this._rectHeight = this.getScaleY()(this._rootNode.y1 - this._rootNode.y0);
 
         // Define the div for the tooltip
         this._div = d3.select<HTMLDivElement, any>("#container").append("div")
@@ -70,7 +72,7 @@ class FlameChart {
 
         this._rects = this._cells.append("rect")
             .attr("width", d => this.getRectWidth(d))
-            .attr("height", d => this.getRectHeight(d))
+            .attr("height", d => this._rectHeight)
             .attr("fill-opacity", 0.6)
             .attr("tabindex", 0)
             .attr("aria-label", d => d.data.name)
@@ -87,7 +89,7 @@ class FlameChart {
 
         this._texts = this._cells.append("text")
             .attr("x", d => this.getRectWidth(d) / 2)
-            .attr("y", d => this.getRectHeight(d) / 2)
+            .attr("y", d => this._rectHeight / 2)
             .attr("dy", "0.32em")
             .attr("text-anchor", d => "middle")
             .attr("font-family", "Monospace")   // use Monospace so each character takes same space.
@@ -149,14 +151,13 @@ class FlameChart {
     }
 
     private getFontSize(node: d3.HierarchyRectangularNode<INode>) {
-        let rectHeight = this.getRectHeight(node);
-        if (rectHeight < 20) {
+        if (this._rectHeight < 20) {
             return "1.2em";
         }
-        else if (rectHeight < 30) {
+        else if (this._rectHeight < 30) {
             return "1.5em";
         }
-        else if (rectHeight < 50) {
+        else if (this._rectHeight < 50) {
             return "2em";
         }
         return "2.5em";
@@ -182,17 +183,13 @@ class FlameChart {
         return d3.scaleLinear().domain([0, this._nodesHeight]).range([0, this._height]);
     }
 
-    private getRectHeight(node: d3.HierarchyRectangularNode<INode>) {
-        return this.getScaleY()(node.y1 - node.y0);
-    }
-
     private getRectWidth(node: d3.HierarchyRectangularNode<INode>) {
         return this.getScaleX()(node.x1 - node.x0);
     }
 
     private getOffsetY(d: d3.HierarchyRectangularNode<INode>) {
         const y = this.getScaleY()(d.y0);
-        return this._isFlipped ? y : this._height - this.getRectHeight(d) - y;
+        return this._isFlipped ? y : this._height - this._rectHeight - y;
     }
 
     private onResize(forceRender: boolean = false) {
@@ -205,11 +202,11 @@ class FlameChart {
 
             this._rects
                 .attr("width", (d: d3.HierarchyRectangularNode<INode>) => this.getRectWidth(d))
-                .attr("height", (d: d3.HierarchyRectangularNode<INode>) => this.getRectHeight(d));
+                .attr("height", this._rectHeight);
 
             this._texts
                 .attr("x", (d: d3.HierarchyRectangularNode<INode>) => this.getRectWidth(d) / 2)
-                .attr("y", (d: d3.HierarchyRectangularNode<INode>) => this.getRectHeight(d) / 2);
+                .attr("y", this._rectHeight / 2);
 
             this._spans
                 .text((d: d3.HierarchyRectangularNode<INode>) => this.getRectText(d))
@@ -247,10 +244,6 @@ class FlameChart {
         this._nodesWidth = p.x1 - p.x0;
 
         this._rootNode.each((d: d3.HierarchyRectangularNode<INode>) => {
-            /*if(d.data.fade) {
-                d.x0 = 0;
-                d.x1 = this._width;
-            }*/
             d.x0 = d.x0 - rootx0;
             d.x1 = d.x1 - rootx0;
         });
@@ -261,10 +254,7 @@ class FlameChart {
 
         this._rects.transition(t as any)
             .attr("width", (d: d3.HierarchyRectangularNode<INode>) => this.getRectWidth(d))
-            .attr("height", (d: d3.HierarchyRectangularNode<INode>) => this.getRectHeight(d))
-            /*.attr("fill", (d: d3.HierarchyRectangularNode<INode>) => {
-                return d.data.fade ? "gray": Color.colorHash(d.data.name, d.data.type);
-            });*/
+            .attr("height", this._rectHeight)
             .style("opacity", (d: d3.HierarchyRectangularNode<INode>) => d.data.fade ? 0.5 : 1);
 
         this._texts.transition(t as any)
