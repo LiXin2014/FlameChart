@@ -4,8 +4,9 @@ interface INode {
     name: string,
     value: number,
     type: string,
-    hide: boolean,
-    fade: boolean,
+    hide: boolean,      // indicates if the rect is hidden
+    fade: boolean,      // indicates if the rect is faded
+    title: string;      // part of the name shows up in rect cell.
     children: INode[]
 }
 
@@ -89,15 +90,14 @@ class FlameChart {
 
         this._texts = this._cells.append("text")
             .attr("x", d => this.getRectWidth(d) / 2)
-            .attr("y", d => this._rectHeight / 2)
+            .attr("y", this._rectHeight / 2)
             .attr("dy", "0.32em")
             .attr("text-anchor", d => "middle")
             .attr("font-family", "Monospace")   // use Monospace so each character takes same space.
-            .attr("font-size", d => this.getFontSize(d))
+            .attr("font-size", d => this.getFontSize(d));
 
         this._spans = this._texts.append('tspan')
-            .text((d: d3.HierarchyRectangularNode<INode>) => this.getRectText(d))
-            .each((d, i, e) => this.wrap(d, i, e));
+            .text((d: d3.HierarchyRectangularNode<INode>) => this.getRectText(d));
 
         // Hook up search button
         const searchButton = document.getElementById("searchButton") as HTMLButtonElement;
@@ -164,15 +164,23 @@ class FlameChart {
     }
 
     private hideRect(node: d3.HierarchyRectangularNode<INode>) : boolean {
-        return node.x1 <=0 || node.y1 <= 0;
+        return node.data.hide;
     }
 
     private getRectText(node: d3.HierarchyRectangularNode<INode>) {
         let width = (this.getRectWidth(node) - 2 * 2);
+        let letterLength: number = this.getLetterLength();
+        let textLength: number = node.data.name.length * letterLength;
+
         if (width < MaxWidth) {
-            return "";
+            node.data.title = "";
+        } else if (textLength < width) {
+            node.data.title = node.data.name;
+        } else {
+            let numOfLetters = width / letterLength - 3;
+            node.data.title = node.data.name.slice(0, numOfLetters) + '...';
         }
-        return node.data.name;
+        return node.data.title;
     }
 
     private getScaleX() {
@@ -205,11 +213,13 @@ class FlameChart {
                 .attr("height", this._rectHeight);
 
             this._texts
-                .attr("x", (d: d3.HierarchyRectangularNode<INode>) => this.getRectWidth(d) / 2)
+                .attr("x", (d: d3.HierarchyRectangularNode<INode>) => {
+                    return d.data.fade ? this._width / 2 - this.getScaleX()(d.x0) : this.getRectWidth(d) / 2;
+                })
                 .attr("y", this._rectHeight / 2);
 
             this._spans
-                .text((d: d3.HierarchyRectangularNode<INode>) => this.getRectText(d))
+                .text((d: d3.HierarchyRectangularNode<INode>) => this.hideRect(d) ? "" : this.getRectText(d))
                 .each((d, i, e) => this.wrap(d, i, e));
         }
 
@@ -235,12 +245,7 @@ class FlameChart {
         }
 
         this._letterLength = 0;
-        this.hideSiblings(p);
-        this.show(p);
-        this.fadeAncestors(p);
-
         let rootx0 = p.x0;
-
         this._nodesWidth = p.x1 - p.x0;
 
         this._rootNode.each((d: d3.HierarchyRectangularNode<INode>) => {
@@ -248,29 +253,27 @@ class FlameChart {
             d.x1 = d.x1 - rootx0;
         });
 
+        this.hideSiblings(p);
+        this.fadeAncestors(p);
+        this.show(p);
+
         const t = this._cells.transition()
             .duration(750)
-            .attr("transform", (d: d3.HierarchyRectangularNode<INode>) => `translate(${this.getScaleX()(d.x0)},${this.getOffsetY(d)})`);
+            .attr("transform", (d: d3.HierarchyRectangularNode<INode>) => `translate(${this.getScaleX()(d.x0)},${this.getOffsetY(d)})`)
 
         this._rects.transition(t as any)
             .attr("width", (d: d3.HierarchyRectangularNode<INode>) => this.getRectWidth(d))
-            .attr("height", this._rectHeight)
+            .attr("height", (d: d3.HierarchyRectangularNode<INode>) => this._rectHeight)
             .style("opacity", (d: d3.HierarchyRectangularNode<INode>) => d.data.fade ? 0.5 : 1);
 
         this._texts.transition(t as any)
             .attr("x", (d: d3.HierarchyRectangularNode<INode>) => {
+                if(this.hideRect(d)) return 0;
                 return d.data.fade ? this._width / 2 - this.getScaleX()(d.x0) : this.getRectWidth(d) / 2;
             })
-            .attr("y", (d: d3.HierarchyRectangularNode<INode>) => this.getScaleY()(d.y1 - d.y0) / 2);
+            .attr("y", (d: d3.HierarchyRectangularNode<INode>) => this.hideRect(d) ? 0 : this.getScaleY()(d.y1 - d.y0) / 2)
+            .text((d: d3.HierarchyRectangularNode<INode>) => d.data.title);
 
-        this._spans
-            .style("opacity", 0)
-            .text((d: d3.HierarchyRectangularNode<INode>) => this.hideRect(d) ? "" : this.getRectText(d))
-            .each((d, i, e) => this.wrap(d, i, e))
-            .transition()
-            .duration(750)
-            .style("opacity", 1);
-        
         var endTime = new Date().getTime();
         console.log("startTime: ", startTime);
         console.log("endTime", endTime);
@@ -291,6 +294,7 @@ class FlameChart {
                 sibling = children[i];
                 if (sibling !== child) {
                     sibling.data.hide = true;
+                    sibling.data.title = "";
                 }
             }
             child = parent;
@@ -299,6 +303,7 @@ class FlameChart {
     }
 
     private show(d: d3.HierarchyRectangularNode<INode>) {
+        this.getRectText(d);
         d.data.fade = false
         d.data.hide = false
         if (d.children) {
@@ -308,7 +313,10 @@ class FlameChart {
 
     private fadeAncestors (d: d3.HierarchyRectangularNode<INode>) {
         if (d.parent) {
-            d.parent.data.fade = true
+            if(!d.parent.data.fade) {
+                this.getRectText(d);
+            }
+            d.parent.data.fade = true;
             this.fadeAncestors(d.parent)
         }
     }
