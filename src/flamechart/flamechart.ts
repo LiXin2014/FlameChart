@@ -41,7 +41,7 @@ class FlameChart {
             d.children?.forEach((child: INode) => { childrenValueTotal += child.value; })
             return d.value - childrenValueTotal;
         });
-        const sorted = summed.sort((a: d3.HierarchyNode<INode>, b: d3.HierarchyNode<INode>) => d3.descending(a.height, b.height) || d3.descending(a.value, b.value));
+        const sorted = summed.sort((a: d3.HierarchyNode<INode>, b: d3.HierarchyNode<INode>) => d3.descending(a.height, b.height) && d3.descending(a.value, b.value));
 
         this._width = 1900; // container width - 100
         this._height = MinViewHeight > root.height * 15 ? MinViewHeight : root.height * 15 + 100;  // take 15 as the minimum cell height
