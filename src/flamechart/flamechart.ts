@@ -28,7 +28,6 @@ class FlameChart {
     private _cells: d3.Selection<SVGGElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
     private _rects: d3.Selection<SVGRectElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
     private _texts: d3.Selection<SVGTextElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
-    private _spans: d3.Selection<SVGTSpanElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
     private _resizeTimeout: any = 0;
     private _isFlipped: boolean = false;
 
@@ -95,9 +94,8 @@ class FlameChart {
             .attr("text-anchor", d => "middle")
             .attr("font-family", "Monospace")   // use Monospace so each character takes same space.
             .attr("font-size", d => this.getFontSize(d));
-
-        this._spans = this._texts.append('tspan')
-            .text((d: d3.HierarchyRectangularNode<INode>) => this.getRectText(d));
+        
+        this._texts.text((d: d3.HierarchyRectangularNode<INode>) => this.getRectText(d));
 
         // Hook up search button
         const searchButton = document.getElementById("searchButton") as HTMLButtonElement;
@@ -112,6 +110,7 @@ class FlameChart {
         window.addEventListener("resize", () => this.onResize());
     }
 
+    // Compute how much space each letter takes with current front size.
     private getLetterLength(): number {
         if(this._letterLength !== 0) {
             return this._letterLength;
@@ -123,33 +122,7 @@ class FlameChart {
         return Math.ceil(this._letterLength);
     }
 
-    private wrap(node: d3.HierarchyRectangularNode<INode>, index: number, elementGroup: SVGTSpanElement[] | ArrayLike<SVGTSpanElement>) {
-        if(this.hideRect(node)) {
-            return;
-        }
-
-        let letterLength: number = this.getLetterLength();
-        let tspanElement: SVGTSpanElement = elementGroup[index];
-        let width = (this.getRectWidth(node)- 2 * 2);
-
-        // If the width is less than 40px, don't show function name.
-        if (width < MaxWidth) {
-            tspanElement.textContent = '';
-            return;
-        }
-
-        let textContent: string | null = tspanElement.textContent;
-        let textLength: number = textContent ? textContent.length * letterLength : 0;
-
-        if (textLength < width) {
-            return;
-        }
-
-        let numOfLetters = width / letterLength - 3;
-        textContent = textContent?.slice(0, numOfLetters) || "";
-        tspanElement.textContent = textContent + '...';
-    }
-
+    // Compute current font size.
     private getFontSize(node: d3.HierarchyRectangularNode<INode>) {
         if (this._rectHeight < 20) {
             return "1.2em";
@@ -161,10 +134,6 @@ class FlameChart {
             return "2em";
         }
         return "2.5em";
-    }
-
-    private hideRect(node: d3.HierarchyRectangularNode<INode>) : boolean {
-        return node.data.hide;
     }
 
     private getRectText(node: d3.HierarchyRectangularNode<INode>) {
@@ -216,11 +185,8 @@ class FlameChart {
                 .attr("x", (d: d3.HierarchyRectangularNode<INode>) => {
                     return d.data.fade ? this._width / 2 - this.getScaleX()(d.x0) : this.getRectWidth(d) / 2;
                 })
-                .attr("y", this._rectHeight / 2);
-
-            this._spans
-                .text((d: d3.HierarchyRectangularNode<INode>) => this.hideRect(d) ? "" : this.getRectText(d))
-                .each((d, i, e) => this.wrap(d, i, e));
+                .attr("y", this._rectHeight / 2)
+                .text((d: d3.HierarchyRectangularNode<INode>) => d.data.title);
         }
 
         if (forceRender) {
@@ -258,7 +224,6 @@ class FlameChart {
         this.show(p);
 
         const t = this._cells.transition()
-            .duration(750)
             .attr("transform", (d: d3.HierarchyRectangularNode<INode>) => `translate(${this.getScaleX()(d.x0)},${this.getOffsetY(d)})`)
 
         this._rects.transition(t as any)
@@ -268,10 +233,10 @@ class FlameChart {
 
         this._texts.transition(t as any)
             .attr("x", (d: d3.HierarchyRectangularNode<INode>) => {
-                if(this.hideRect(d)) return 0;
+                if(d.data.hide) return 0;
                 return d.data.fade ? this._width / 2 - this.getScaleX()(d.x0) : this.getRectWidth(d) / 2;
             })
-            .attr("y", (d: d3.HierarchyRectangularNode<INode>) => this.hideRect(d) ? 0 : this.getScaleY()(d.y1 - d.y0) / 2)
+            .attr("y", (d: d3.HierarchyRectangularNode<INode>) => d.data.hide ? 0 : this.getScaleY()(d.y1 - d.y0) / 2)
             .text((d: d3.HierarchyRectangularNode<INode>) => d.data.title);
 
         var endTime = new Date().getTime();
