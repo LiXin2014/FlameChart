@@ -6,17 +6,16 @@ interface INode {
     type: string,
     hide: boolean,      // indicates if the rect is hidden
     fade: boolean,      // indicates if the rect is faded
-    title: string;      // part of the name shows up in rect cell.
     children: INode[]
 }
 
-const MaxWidth: number = 40;  // maximum text width for rect title.
-const MinViewHeight: number = 1000;   // maximum view port height, scrolling comes in if height exceeds 1000px
+const MaxWidth: number = 40;  // maximum text width for showing rect title.
 
 class FlameChart {
     private _nodes: d3.HierarchyRectangularNode<INode>[];
     private _rootNode: d3.HierarchyRectangularNode<INode>;
     private _currentFocus: d3.HierarchyRectangularNode<INode>;
+    private _divContainer: HTMLElement;
     private _nodesWidth: number;
     private _nodesHeight: number;
     private _rectHeight: number = 0;
@@ -42,8 +41,8 @@ class FlameChart {
         });
         const sorted = summed.sort((a: d3.HierarchyNode<INode>, b: d3.HierarchyNode<INode>) => d3.descending(a.height, b.height) && d3.descending(a.value, b.value));
 
-        this._width = 1900; // container width - 100
-        this._height = MinViewHeight > root.height * 15 ? MinViewHeight : root.height * 15 + 100;  // take 15 as the minimum cell height
+        this._width = document.body.clientWidth; 
+        this._height = document.body.clientHeight < root.height * 15 ? root.height * 15 : document.body.clientHeight;  // take 15 as the minimum cell height
         const partitionLayout = d3.partition<INode>().size([this._height, this._width]).padding(0);  // padding introduces a lot problems. missing cells, too big gap when zoomed in. So instead of using padding, use strokewidth around rect to achieve padding look.
 
         const partitioned = partitionLayout(sorted);
@@ -60,7 +59,11 @@ class FlameChart {
             .attr("class", "tooltip")
             .style("opacity", 0);
 
-        this._svg = d3.select<SVGElement, INode>("svg").attr("width", this._width).attr("height", this._height);
+        this._svg = d3.select<SVGElement, INode>("svg").attr("width", this._width).attr("height", this._rectHeight * (this._rootNode.height + 1));
+        this._divContainer = document.querySelector("#container") as HTMLElement ;
+        this._divContainer.style.width = document.body.clientWidth.toString() + "px";
+        this._divContainer.style.height = document.body.clientHeight.toString() + "px";
+
 
         this._cells = this._svg
             .selectAll<SVGGElement, INode>("g")
@@ -142,14 +145,13 @@ class FlameChart {
         let textLength: number = node.data.name.length * letterLength;
 
         if (width < MaxWidth) {
-            node.data.title = "";
+            return "";
         } else if (textLength < width) {
-            node.data.title = node.data.name;
+            return node.data.name;
         } else {
             let numOfLetters = width / letterLength - 3;
-            node.data.title = node.data.name.slice(0, numOfLetters) + '...';
+            return node.data.name.slice(0, numOfLetters) + '...';
         }
-        return node.data.title;
     }
 
     private getScaleX() {
@@ -171,6 +173,10 @@ class FlameChart {
 
     private onResize(forceRender: boolean = false) {
         const render = () => {
+            this._width = document.body.clientWidth;
+            this._divContainer.style.width = document.body.clientWidth.toString() + "px";
+            this._divContainer.style.height = document.body.clientHeight.toString() + "px";
+
             this._svg
                 .attr("width", this._width).attr("height", this._height);
 
@@ -186,7 +192,7 @@ class FlameChart {
                     return d.data.fade ? this._width / 2 - this.getScaleX()(d.x0) : this.getRectWidth(d) / 2;
                 })
                 .attr("y", this._rectHeight / 2)
-                .text((d: d3.HierarchyRectangularNode<INode>) => d.data.title);
+                .text((d: d3.HierarchyRectangularNode<INode>) => this.getRectText(d));
         }
 
         if (forceRender) {
@@ -237,7 +243,7 @@ class FlameChart {
                 return d.data.fade ? this._width / 2 - this.getScaleX()(d.x0) : this.getRectWidth(d) / 2;
             })
             .attr("y", (d: d3.HierarchyRectangularNode<INode>) => d.data.hide ? 0 : this.getScaleY()(d.y1 - d.y0) / 2)
-            .text((d: d3.HierarchyRectangularNode<INode>) => d.data.title);
+            .text((d: d3.HierarchyRectangularNode<INode>) => this.getRectText(d));
 
         var endTime = new Date().getTime();
         console.log("startTime: ", startTime);
@@ -259,7 +265,6 @@ class FlameChart {
                 sibling = children[i];
                 if (sibling !== child) {
                     sibling.data.hide = true;
-                    sibling.data.title = "";
                 }
             }
             child = parent;
@@ -268,7 +273,6 @@ class FlameChart {
     }
 
     private show(d: d3.HierarchyRectangularNode<INode>) {
-        this.getRectText(d);
         d.data.fade = false
         d.data.hide = false
         if (d.children) {
@@ -278,9 +282,6 @@ class FlameChart {
 
     private fadeAncestors (d: d3.HierarchyRectangularNode<INode>) {
         if (d.parent) {
-            if(!d.parent.data.fade) {
-                this.getRectText(d);
-            }
             d.parent.data.fade = true;
             this.fadeAncestors(d.parent)
         }

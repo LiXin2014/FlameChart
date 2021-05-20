@@ -9,8 +9,6 @@ html, body {
 
 div#container {
   position: relative;
-  height: 1050px;
-  width: 2000px;
   overflow: auto;
 }
 
