@@ -107,6 +107,10 @@ class FlameChart {
         const searchButton = document.getElementById("searchButton") as HTMLButtonElement;
         searchButton.addEventListener("click", () => this.onSearch());
 
+        // Hook up clear search button
+        const clearSearchButton = document.getElementById("clearSearchButton") as HTMLButtonElement;
+        clearSearchButton.addEventListener("click", () => this.onClearSearch());
+
         // Hook up reset zoom button
         const resetZoomButton = document.getElementById("resetZoomButton") as HTMLButtonElement;
         resetZoomButton.addEventListener("click", () => this.onZoom(this._rootNode));
@@ -246,6 +250,19 @@ class FlameChart {
             .duration(750)
             .attr("fill", (d: any) => {
                 return d.highlighted ? "red" : Color.colorHash(d.data.name, d.data.type);
+            });
+    }
+
+    private onClearSearch() {
+        (document.getElementById("term") as HTMLInputElement)!.value = "";
+        this._rects.each((rect: any) => {
+            rect.highlighted = false;
+        });
+
+        this._rects.transition()
+            .duration(750)
+            .attr("fill", (d: any) => {
+                return Color.colorHash(d.data.name, d.data.type);
             });
     }
 
