@@ -1,6 +1,7 @@
 import {Color} from './color.js';
+import * as Utils from './flamechartUtils.js';
 
-interface INode {
+export interface INode {
     name: string,
     value: number,
     type: string,
@@ -22,7 +23,7 @@ class FlameChart {
     private _width: number;
     private _height: number;
     private _letterLength: number = 0;
-    private _div: d3.Selection<HTMLDivElement, any, HTMLElement, any>;
+    private _tooltipDiv: d3.Selection<HTMLDivElement, any, HTMLElement, any>;
     private _svg: d3.Selection<SVGElement, INode, HTMLElement, any>;
     private _cells: d3.Selection<SVGGElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
     private _rects: d3.Selection<SVGRectElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
@@ -55,7 +56,7 @@ class FlameChart {
         this._rectHeight = this.getScaleY()(this._rootNode.y1 - this._rootNode.y0);
 
         // Define the div for the tooltip
-        this._div = d3.select<HTMLDivElement, any>("#container").append("div")
+        this._tooltipDiv = d3.select<HTMLDivElement, any>("#container").append("div")
             .attr("class", "tooltip")
             .style("opacity", 0);
 
@@ -88,9 +89,9 @@ class FlameChart {
             .attr("stroke", "rgb(255, 255, 255)")
             .style("cursor", "pointer")
             .on("click", (e: Event, p: d3.HierarchyRectangularNode<INode>) => this.onZoom(p))
-            .on("mouseover", (e: Event, p: d3.HierarchyRectangularNode<INode>) => this.onMouseOver(e, p))
-            .on("mouseout", (e: Event, p: d3.HierarchyRectangularNode<INode>) => this.onMouseOut(e, p))
-            .on("mousemove", (e: MouseEvent, p: d3.HierarchyRectangularNode<INode>) => this.onMouseMove(e, p));
+            .on("mouseover", (e: MouseEvent, p: d3.HierarchyRectangularNode<INode>) => Utils.onMouseOver(e, p, this._tooltipDiv))
+            .on("mouseout", (e: Event, p: d3.HierarchyRectangularNode<INode>) => Utils.onMouseOut(e, p, this._tooltipDiv))
+            .on("mousemove", (e: MouseEvent, p: d3.HierarchyRectangularNode<INode>) => Utils.onMouseMove(e, p, this._tooltipDiv));
 
         this._texts = this._cells.append("text")
             .attr("x", d => this.getRectWidth(d) / 2)
@@ -98,7 +99,7 @@ class FlameChart {
             .attr("dy", "0.32em")
             .attr("text-anchor", d => "middle")
             .attr("font-family", "Monospace")   // use Monospace so each character takes same space.
-            .attr("font-size", d => this.getFontSize(d));
+            .attr("font-size", Utils.getFontSize(this._rectHeight));
         
         this._texts.text((d: d3.HierarchyRectangularNode<INode>) => this.getRectText(d));
 
@@ -114,44 +115,20 @@ class FlameChart {
 
         window.addEventListener("resize", () => this.onResize());
     }
-
-    // Compute how much space each letter takes with current front size.
-    private getLetterLength(): number {
-        if(this._letterLength !== 0) {
-            return this._letterLength;
-        }
-        let text: SVGTextElement = this._texts.nodes()[0];
-        let textContent: string | null = text.textContent;
-        let textLength: number = text.getComputedTextLength();
-        this._letterLength = textContent ? textLength / textContent.length : 0;
-        return Math.ceil(this._letterLength);
-    }
-
-    // Compute current font size.
-    private getFontSize(node: d3.HierarchyRectangularNode<INode>) {
-        if (this._rectHeight < 20) {
-            return "1.2em";
-        }
-        else if (this._rectHeight < 30) {
-            return "1.5em";
-        }
-        else if (this._rectHeight < 50) {
-            return "2em";
-        }
-        return "2.5em";
-    }
-
+    
     private getRectText(node: d3.HierarchyRectangularNode<INode>) {
         let width = (this.getRectWidth(node) - 2 * 2);
-        let letterLength: number = this.getLetterLength();
-        let textLength: number = node.data.name.length * letterLength;
+        if(this._letterLength === 0){
+            this._letterLength = Utils.getLetterLength(this._texts.nodes()[0]);
+        }
+        let textLength: number = node.data.name.length * this._letterLength;
 
         if (width < MaxWidth) {
             return "";
         } else if (textLength < width) {
             return node.data.name;
         } else {
-            let numOfLetters = width / letterLength - 3;
+            let numOfLetters = width / this._letterLength - 3;
             return node.data.name.slice(0, numOfLetters) + '...';
         }
     }
@@ -227,9 +204,9 @@ class FlameChart {
             d.x1 = d.x1 - rootx0;
         });
 
-        this.hideSiblings(p);
-        this.fadeAncestors(p);
-        this.show(p);
+        Utils.hideSiblings(p);
+        Utils.fadeAncestors(p);
+        Utils.show(p);
 
         const t = this._cells.transition()
             .attr("transform", (d: d3.HierarchyRectangularNode<INode>) => `translate(${this.getScaleX()(d.x0)},${this.getOffsetY(d)})`)
@@ -251,64 +228,6 @@ class FlameChart {
         console.log("startTime: ", startTime);
         console.log("endTime", endTime);
         console.log("elapsed: ", endTime - startTime);
-    }
-
-    private hideSiblings(node: d3.HierarchyRectangularNode<INode>) {
-        let child: d3.HierarchyRectangularNode<INode> = node;
-        let parent: d3.HierarchyRectangularNode<INode> | null = child.parent;
-        let children: d3.HierarchyRectangularNode<INode>[] | undefined, i: number, sibling: d3.HierarchyRectangularNode<INode>;
-        while (parent) {
-            children = parent.children;
-            if(children === undefined) {
-                children = [];
-            }
-            i = children.length;
-            while (i--) {
-                sibling = children[i];
-                if (sibling !== child) {
-                    sibling.data.hide = true;
-                }
-            }
-            child = parent;
-            parent = child.parent;
-        }
-    }
-
-    private show(d: d3.HierarchyRectangularNode<INode>) {
-        d.data.fade = false
-        d.data.hide = false
-        if (d.children) {
-            d.children.forEach((d: d3.HierarchyRectangularNode<INode>) => this.show(d));
-        }
-    }
-
-    private fadeAncestors (d: d3.HierarchyRectangularNode<INode>) {
-        if (d.parent) {
-            d.parent.data.fade = true;
-            this.fadeAncestors(d.parent)
-        }
-    }
-   
-    private onMouseOver(event: Event, d: d3.HierarchyRectangularNode<INode>) {
-        this._div.transition()
-            .duration(200)
-            .style("opacity", .9);
-    }
-
-    private onMouseOut(event: Event, d: d3.HierarchyRectangularNode<INode>) {
-        this._div.transition()
-            .duration(500)
-            .style("opacity", 0);
-    }
-
-    private onMouseMove(event: MouseEvent, d: d3.HierarchyRectangularNode<INode>) {
-        let container: HTMLDivElement | null = document.querySelector('#container');
-        let scrollTop: number = container ? container.scrollTop : 0;
-        let scrollLeft: number = container ? container.scrollLeft : 0;
-
-        this._div.html("<b>name:</b> " + d.data.name + ", <b>value:</b> " + d.data.value)
-            .style("left", event.clientX + scrollLeft + "px")
-            .style("top", event.clientY + scrollTop + "px");
     }
 
     private onSearch() {
