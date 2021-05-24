@@ -42,7 +42,7 @@ class FlameChart {
         const sorted = summed.sort((a: d3.HierarchyNode<INode>, b: d3.HierarchyNode<INode>) => d3.descending(a.height, b.height) && d3.descending(a.value, b.value));
 
         this._width = document.body.clientWidth; 
-        this._height = document.body.clientHeight < root.height * 15 ? root.height * 15 : document.body.clientHeight;  // take 15 as the minimum cell height
+        this._height = document.body.clientHeight / 2 < (root.height + 1) * 15 ? (root.height + 1) * 15 : document.body.clientHeight / 2;  // take 15 as the minimum cell height
         const partitionLayout = d3.partition<INode>().size([this._height, this._width]).padding(0);  // padding introduces a lot problems. missing cells, too big gap when zoomed in. So instead of using padding, use strokewidth around rect to achieve padding look.
 
         const partitioned = partitionLayout(sorted);
@@ -60,6 +60,8 @@ class FlameChart {
             .style("opacity", 0);
 
         this._svg = d3.select<SVGElement, INode>("svg").attr("width", this._width).attr("height", this._rectHeight * (this._rootNode.height + 1));
+
+        // set width and height for container, so the scroll shows up when overflow.
         this._divContainer = document.querySelector("#container") as HTMLElement ;
         this._divContainer.style.width = document.body.clientWidth.toString() + "px";
         this._divContainer.style.height = document.body.clientHeight.toString() + "px";
