@@ -222,6 +222,7 @@ class FlameChart {
         this._rects.transition(t as any)
             .attr("width", (d: d3.HierarchyRectangularNode<INode>) => this.getRectWidth(d))
             .attr("height", (d: d3.HierarchyRectangularNode<INode>) => this._rectHeight)
+            .attr("tabindex", (d: d3.HierarchyRectangularNode<INode>) => d.data.hide ? -1 : 0)
             .style("opacity", (d: d3.HierarchyRectangularNode<INode>) => d.data.fade ? 0.5 : 1);
 
         this._texts.transition(t as any)

@@ -52,6 +52,7 @@ export function hideSiblings(node: d3.HierarchyRectangularNode<INode>) {
     let child: d3.HierarchyRectangularNode<INode> = node;
     let parent: d3.HierarchyRectangularNode<INode> | null = child.parent;
     let children: d3.HierarchyRectangularNode<INode>[] | undefined, i: number, sibling: d3.HierarchyRectangularNode<INode>;
+
     while (parent) {
         children = parent.children;
         if(children === undefined) {
@@ -62,6 +63,9 @@ export function hideSiblings(node: d3.HierarchyRectangularNode<INode>) {
             sibling = children[i];
             if (sibling !== child) {
                 sibling.data.hide = true;
+                sibling.each(node => {
+                    node.data.hide = true;
+                });
             }
         }
         child = parent;
