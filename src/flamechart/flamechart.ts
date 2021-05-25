@@ -3,6 +3,7 @@ import * as Utils from './flamechartUtils.js';
 
 export interface INode {
     name: string,
+    id: number,         // an id that marks navigation order
     value: number,
     type: string,
     hide: boolean,      // indicates if the rect is hidden
@@ -30,6 +31,7 @@ class FlameChart {
     private _texts: d3.Selection<SVGTextElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
     private _resizeTimeout: any = 0;
     private _isFlipped: boolean = false;
+    private _id: number = 0;
 
     constructor(root: d3.HierarchyNode<INode>) {
         this._isFlipped = (document.getElementById("flip") as HTMLInputElement).checked;
@@ -73,6 +75,7 @@ class FlameChart {
             .data(this._nodes)
             .join("g")
             .attr("transform", d => {
+                d.data.id = this._id++;
                 return `translate(${this.getScaleX()(d.x0)},${this.getOffsetY(d)})`;
             })
 
@@ -89,6 +92,7 @@ class FlameChart {
             .attr("stroke", "rgb(255, 255, 255)")
             .style("cursor", "pointer")
             .on("click", (e: Event, p: d3.HierarchyRectangularNode<INode>) => this.onZoom(p))
+            .on("keydown", (e: KeyboardEvent, p: d3.HierarchyRectangularNode<INode>) => this.onKeyDown(e, p))
             .on("mouseover", (e: MouseEvent, p: d3.HierarchyRectangularNode<INode>) => Utils.onMouseOver(e, p, this._tooltipDiv))
             .on("mouseout", (e: Event, p: d3.HierarchyRectangularNode<INode>) => Utils.onMouseOut(e, p, this._tooltipDiv))
             .on("mousemove", (e: MouseEvent, p: d3.HierarchyRectangularNode<INode>) => Utils.onMouseMove(e, p, this._tooltipDiv));
@@ -226,12 +230,72 @@ class FlameChart {
                 return d.data.fade ? this._width / 2 - this.getScaleX()(d.x0) : this.getRectWidth(d) / 2;
             })
             .attr("y", (d: d3.HierarchyRectangularNode<INode>) => d.data.hide ? 0 : this.getScaleY()(d.y1 - d.y0) / 2)
-            .text((d: d3.HierarchyRectangularNode<INode>) => this.getRectText(d));
+            .text((d: d3.HierarchyRectangularNode<INode>) => d.data.hide ? "" : this.getRectText(d));
 
         var endTime = new Date().getTime();
         console.log("startTime: ", startTime);
         console.log("endTime", endTime);
         console.log("elapsed: ", endTime - startTime);
+    }
+
+    private onKeyDown(e: KeyboardEvent, p: d3.HierarchyRectangularNode<INode>) {
+        // zoom in / out with Enter
+        if(e.keyCode === 13){
+            this.onZoom(p);
+        } 
+        // go to root with Escape
+        else if(e.keyCode === 27) {
+            let rect : SVGRectElement = (this._rects as any)._groups[0][0];
+            rect.focus();
+        } 
+        // go to parent with Up
+        else if(e.keyCode === 38) {
+            if(!p.data.id === undefined) {
+                console.log("the id should be set in constructor!");
+            }
+            let parent: d3.HierarchyRectangularNode<INode> = !p.parent ? this._rootNode : p.parent;
+            let rect: SVGRectElement = (this._rects as any)._groups[0][parent.data.id];
+            rect.focus();
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        // go to left most visible child with Down
+        else if(e.keyCode === 40) {
+            if(!p.data.id === undefined) {
+                console.log("the id should be set in constructor!");
+            }
+            let child: d3.HierarchyRectangularNode<INode> = !p.children ? this._rootNode : p.children.filter(node => !node.data.hide)[0];
+            let rect: SVGRectElement = (this._rects as any)._groups[0][child.data.id];
+            rect.focus();
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        // go to left sibling with Left
+        else if(e.keyCode === 37) {
+            if(!p.data.id) {
+                console.log("the id should be set in constructor!");
+            }
+            if(p.parent?.children) {
+                let leftSibling = p.parent?.children.filter(node => node.data.id === p.data.id - 1).filter(node => !node.data.hide)[0]
+                if(leftSibling) {
+                    let rect: SVGRectElement = (this._rects as any)._groups[0][leftSibling.data.id];
+                    rect.focus();
+                }
+            }
+        }
+        // go to right sibling with Right
+        else if(e.keyCode === 39) {
+            if(!p.data.id) {
+                console.log("the id should be set in constructor!");
+            }
+            if(p.parent?.children) {
+                let rightSibling = p.parent?.children.filter(node => node.data.id === p.data.id + 1).filter(node => !node.data.hide)[0]
+                if(rightSibling) {
+                    let rect: SVGRectElement = (this._rects as any)._groups[0][rightSibling.data.id];
+                    rect.focus();
+                }
+            }
+        }
     }
 
     private onSearch() {
