@@ -30,12 +30,10 @@ class FlameChart {
     private _rects: d3.Selection<SVGRectElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
     private _texts: d3.Selection<SVGTextElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
     private _resizeTimeout: any = 0;
-    private _isFlipped: boolean = false;
+    private _isFlipped: KnockoutObservable<boolean> = ko.observable(true);
     private _id: number = 0;
 
     constructor(root: d3.HierarchyNode<INode>) {
-        this._isFlipped = (document.getElementById("flip") as HTMLInputElement).checked;
-
         // sum computes value for each node. node's value = whatever returns here + its children value total
         const summed = root.sum((d: INode) => {
             var childrenValueTotal = 0;
@@ -107,19 +105,7 @@ class FlameChart {
 
         this._texts.text((d: d3.HierarchyRectangularNode<INode>) => this.getRectText(d));
 
-        // Hook up search button
-        const searchButton = document.getElementById("searchButton") as HTMLButtonElement;
-        searchButton.addEventListener("click", () => this.onSearch());
-
-        // Hook up clear search button
-        const clearSearchButton = document.getElementById("clearSearchButton") as HTMLButtonElement;
-        clearSearchButton.addEventListener("click", () => this.onClearSearch());
-
-        // Hook up reset zoom button
-        const resetZoomButton = document.getElementById("resetZoomButton") as HTMLButtonElement;
-        resetZoomButton.addEventListener("click", () => this.onZoom(this._rootNode));
-
-        document.getElementById("flip")?.addEventListener("click", () => this.onFlip());
+        this._isFlipped.subscribe(this.onFlip, this);
 
         window.addEventListener("resize", () => this.onResize());
     }
@@ -155,7 +141,7 @@ class FlameChart {
 
     private getOffsetY(d: d3.HierarchyRectangularNode<INode>) {
         const y = this.getScaleY()(d.y0);
-        return this._isFlipped ? y : this._height - this._rectHeight - y;
+        return this.isFlipped() ? y : this._height - this._rectHeight - y;
     }
 
     private onResize(forceRender: boolean = false) {
@@ -193,6 +179,10 @@ class FlameChart {
         }
 
         this._resizeTimeout = setTimeout(() => render(), 100);
+    }
+
+    public onResetZoom() {
+        this.onZoom(this._rootNode);
     }
 
     private onZoom(p: d3.HierarchyRectangularNode<INode>) {
@@ -299,7 +289,7 @@ class FlameChart {
         }
     }
 
-    private onSearch() {
+    public onSearch() {
         const term = (document.getElementById("term") as HTMLInputElement)!.value;
         this._rects.each((rect: any) => {
             const index = rect.data.name.toLocaleLowerCase().indexOf(term.toLocaleLowerCase());
@@ -318,7 +308,7 @@ class FlameChart {
             });
     }
 
-    private onClearSearch() {
+    public onClearSearch() {
         (document.getElementById("term") as HTMLInputElement)!.value = "";
         this._rects.each((rect: any) => {
             rect.highlighted = false;
@@ -332,13 +322,17 @@ class FlameChart {
     }
 
     private onFlip() {
-        this._isFlipped = (document.getElementById("flip") as HTMLInputElement).checked;
         this.onResize(true);
+    }
+
+    public get isFlipped(): KnockoutObservable<boolean> {
+        return this._isFlipped;
     }
 }
 
 async function initialize() {
     const data: any = await d3.json("PrimeVisualizer.json");
-    new FlameChart(d3.hierarchy(data));
+    const flameChart = new FlameChart(d3.hierarchy(data));
+    ko.applyBindings(flameChart);
 }
 initialize();

@@ -5,16 +5,17 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://d3js.org/d3.v6.js"></script>
   <script src="https://d3js.org/d3-hierarchy.v2.js"></script>
+  <script type='text/javascript' src='knockout-3.5.1.js'></script>
+  <script type="module" src="./flamechart.js"></script>
 </head>
 <body>
   <input id="term" type="text" class="form-control" />
-  <button id="searchButton">Search</button>
-  <button id="clearSearchButton">Clear Search</button>
-  <button id="resetZoomButton">Reset Zoom</button>
-  <input id="flip" type="checkbox" checked/><span>Flip</span>
+  <button id="searchButton" data-bind="event: {click: onSearch}">Search</button>
+  <button id="clearSearchButton" data-bind="event: {click: onClearSearch}">Clear Search</button>
+  <button id="resetZoomButton" data-bind="event: {click: onResetZoom}">Reset Zoom</button>
+  <input id="flip" type="checkbox" data-bind="checked: isFlipped"/><span>Flip</span>
   <div id="container">
     <svg id="chart"></svg>
-    <script type="module" src="./flamechart.js"></script>
   </div>
 </body>
 </html>
