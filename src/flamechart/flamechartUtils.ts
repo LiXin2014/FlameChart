@@ -25,20 +25,6 @@ export function onMouseMove(event: MouseEvent, d: d3.HierarchyRectangularNode<IN
         .style("top", event.clientY + scrollTop + "px");
 }
 
-// Compute current font size.
-export function getFontSize(rectHeight: number) {
-    if (rectHeight < 20) {
-        return "1.2em";
-    }
-    else if (rectHeight < 30) {
-        return "1.5em";
-    }
-    else if (rectHeight < 50) {
-        return "2em";
-    }
-    return "2.5em";
-}
-
 // Compute how much space each letter takes with current front size.
 export function getLetterLength(text: SVGTextElement): number {
     let textContent: string | null = text.textContent;
