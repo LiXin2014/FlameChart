@@ -229,13 +229,10 @@ class FlameChart {
 
         console.log("transition Texts: ", endTime - transitionRects);
 
-        //console.log("startTime: ", startTime);
-        //console.log("endTime", endTime);
         console.log("elapsed total: ", endTime - startTime);
     }
 
     private zoomCells(node: d3.HierarchyRectangularNode<INode>, index: number, elementGroup: SVGGElement[] | ArrayLike<SVGGElement>) {
-        if (node.data.hide) return;
         let rectElement: SVGGElement = elementGroup[index];
         rectElement.setAttribute("transform", `translate(${node.data.fade ? 0 : this._scaleX(node.x0)},${this.getOffsetY(node)})`);
     }
@@ -243,14 +240,10 @@ class FlameChart {
     private zoomRects(node: d3.HierarchyRectangularNode<INode>, index: number, elementGroup: SVGRectElement[] | ArrayLike<SVGRectElement>) {
         let rectElement: SVGRectElement = elementGroup[index];
         if (node.data.hide) {
-            rectElement.setAttribute("opacity", "0");
             rectElement.setAttribute("tabindex", "-1");
-            return;
         } else if (node.data.fade) {
             rectElement.setAttribute("opacity", "0.3");
-            rectElement.setAttribute("tabindex", "-1");
             rectElement.setAttribute("width", this._width.toString());
-            return;
         } else {
             rectElement.setAttribute("opacity", "0.6");
             rectElement.setAttribute("tabindex", "0");
@@ -260,13 +253,9 @@ class FlameChart {
 
     private zoomTexts(node: d3.HierarchyRectangularNode<INode>, index: number, elementGroup: SVGTextElement[] | ArrayLike<SVGTextElement>) {
         let textElement: SVGTextElement = elementGroup[index];
-        if (node.data.hide) {
-            textElement.textContent = "";
-            return;
-        } else if (node.data.fade) {
+        if (node.data.fade) {
             textElement.setAttribute("x", (this._width / 2).toString());
             textElement.textContent = node.data.name;
-            return;
         } else {
             textElement.setAttribute("x", (this.getRectWidth(node) / 2).toString());
             textElement.textContent = this.getRectText(node);
