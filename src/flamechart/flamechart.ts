@@ -144,7 +144,6 @@ class FlameChart {
 
     private onResize(forceRender: boolean = false) {
         const render = () => {
-            var startTime = new Date().getTime();
             this._width = document.body.clientWidth;
             this._scaleX = d3.scaleLinear().domain([0, this._nodesWidth]).range([0, this._width]);
             this._divContainer.style.width = document.body.clientWidth.toString() + "px";
@@ -156,27 +155,15 @@ class FlameChart {
             this._groups
                 .attr("transform", (d: d3.HierarchyRectangularNode<INode>) => `translate(${this._scaleX(d.x0)},${this.getOffsetY(d)})`);
 
-            var transitionCells = new Date().getTime();
-            console.log("transition cells: ", transitionCells - startTime);
-
             this._rects
                 .attr("width", (d: d3.HierarchyRectangularNode<INode>) => this.getRectWidth(d))
 
-            var transitionRects = new Date().getTime();
-            console.log("transition rects: ", transitionRects - transitionCells);
-
-            this._texts
+                this._texts
                 .attr("x", (d: d3.HierarchyRectangularNode<INode>) => {
                     return d.data.fade ? this._width / 2 - this._scaleX(d.x0) : this.getRectWidth(d) / 2;
                 })
                 .attr("y", RectHeight / 2)
                 .text((d: d3.HierarchyRectangularNode<INode>) => this.getRectText(d));
-
-            var endTime = new Date().getTime();
-
-            console.log("transition Texts: ", endTime - transitionRects);
-
-            console.log("resize total: ", endTime - startTime);
         }
 
         if (forceRender) {
