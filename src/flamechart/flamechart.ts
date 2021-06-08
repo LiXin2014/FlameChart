@@ -26,9 +26,9 @@ class FlameChart {
     private _letterLength: number = 0;
     private _tooltipDiv: d3.Selection<HTMLDivElement, any, HTMLElement, any>;
     private _svg: d3.Selection<SVGElement, INode, HTMLElement, any>;
-    private _cells: d3.Selection<SVGGElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
+    private _groups: d3.Selection<SVGGElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
     private _rects: d3.Selection<SVGRectElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
-    private _texts: d3.Selection<SVGTextElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
+    private _texts!: d3.Selection<SVGTextElement, d3.HierarchyRectangularNode<INode>, SVGElement, INode>;
     private _resizeTimeout: any = 0;
     private _isFlipped: KnockoutObservable<boolean> = ko.observable(true);
     private _id: number = 0;
@@ -70,42 +70,47 @@ class FlameChart {
         this._divContainer.style.width = document.body.clientWidth.toString() + "px";
         this._divContainer.style.height = document.body.clientHeight.toString() + "px";
 
-        this._cells = this._svg
-        .selectAll<SVGGElement, INode>("g")
-        .data(this._nodes)
-        .join("g")
-        .attr("transform", d => {
-            d.data.id = this._id++;
-            return `translate(${this._scaleX(d.x0)},${this.getOffsetY(d)})`;
-        })
+        this._groups = this._svg
+            .selectAll<SVGGElement, INode>("g")
+            .data(this._nodes)
+            .join("g")
+            .attr("transform", d => {
+                d.data.id = this._id++;
+                return `translate(${this._scaleX(d.x0)},${this.getOffsetY(d)})`;
+            })
 
-        this._rects = this._cells.append("rect")
+        this._rects = this._groups.append("rect")
             .attr("width", d => this.getRectWidth(d))
             .attr("height", RectHeight)
             .attr("opacity", 0.6)
-            .attr("tabindex", 0)
-            .attr("aria-label", d => d.data.name)
             .attr("fill", d => {
                 return Color.colorHash(d.data.name, d.data.type);
             })
             .attr("stroke-width", 1)
-            .attr("stroke", "rgb(255, 255, 255)")
-            .style("cursor", "pointer")
-            .on("click", (e: Event, p: d3.HierarchyRectangularNode<INode>) => this.onZoom(p))
-            .on("keydown", (e: KeyboardEvent, p: d3.HierarchyRectangularNode<INode>) => this.onKeyDown(e, p))
-            .on("mouseover", (e: MouseEvent, p: d3.HierarchyRectangularNode<INode>) => Utils.onMouseOver(e, p, this._tooltipDiv))
-            .on("mouseout", (e: Event, p: d3.HierarchyRectangularNode<INode>) => Utils.onMouseOut(e, p, this._tooltipDiv))
-            .on("mousemove", (e: MouseEvent, p: d3.HierarchyRectangularNode<INode>) => Utils.onMouseMove(e, p, this._tooltipDiv));
+            .attr("stroke", "rgb(255, 255, 255)");
 
-        this._texts = this._cells.append("text")
-            .attr("x", d => this.getRectWidth(d) / 2)
-            .attr("y", RectHeight / 2)
-            .attr("dy", "0.32em")
-            .attr("text-anchor", d => "middle")
-            .attr("font-family", "Monospace")   // use Monospace so each character takes same space.
-            .attr("font-size", "1.2em");
+        setTimeout(() => {
+            this._texts = this._groups.append("text")
+                .attr("x", d => this.getRectWidth(d) / 2)
+                .attr("y", RectHeight / 2)
+                .attr("dy", "0.32em")
+                .attr("text-anchor", d => "middle")
+                .attr("font-family", "Monospace")   // use Monospace so each character takes same space.
+                .attr("font-size", "1.2em");
 
-        this._texts.text((d: d3.HierarchyRectangularNode<INode>) => this.getRectText(d));
+            this._texts.text((d: d3.HierarchyRectangularNode<INode>) => this.getRectText(d));
+
+            this._rects
+                .attr("tabindex", 0)
+                .attr("aria-label", d => d.data.name)
+                .style("cursor", "pointer")
+                .on("click", (e: Event, p: d3.HierarchyRectangularNode<INode>) => this.onZoom(p))
+                .on("keydown", (e: KeyboardEvent, p: d3.HierarchyRectangularNode<INode>) => this.onKeyDown(e, p))
+                .on("mouseover", (e: MouseEvent, p: d3.HierarchyRectangularNode<INode>) => Utils.onMouseOver(e, p, this._tooltipDiv))
+                .on("mouseout", (e: Event, p: d3.HierarchyRectangularNode<INode>) => Utils.onMouseOut(e, p, this._tooltipDiv))
+                .on("mousemove", (e: MouseEvent, p: d3.HierarchyRectangularNode<INode>) => Utils.onMouseMove(e, p, this._tooltipDiv));
+        }, 0);
+        
         this._isFlipped.subscribe(this.onFlip, this);
 
         window.addEventListener("resize", () => this.onResize());
@@ -148,7 +153,7 @@ class FlameChart {
             this._svg
                 .attr("width", this._width).attr("height", this._height);
 
-            this._cells
+            this._groups
                 .attr("transform", (d: d3.HierarchyRectangularNode<INode>) => `translate(${this._scaleX(d.x0)},${this.getOffsetY(d)})`);
 
             var transitionCells = new Date().getTime();
@@ -213,7 +218,8 @@ class FlameChart {
         Utils.fadeAncestors(p);
         Utils.show(p);
 
-        this._cells.each((d, i, e) => this.zoomCells(d, i, e));
+        this._groups
+            .attr("transform", (d: d3.HierarchyRectangularNode<INode>) => `translate(${d.data.fade ? 0 : this._scaleX(d.x0)},${this.getOffsetY(d)})`);
 
         var transitionCells = new Date().getTime();
         console.log("transition cells: ", transitionCells - startTime);
@@ -223,18 +229,14 @@ class FlameChart {
         var transitionRects = new Date().getTime();
         console.log("transition rects: ", transitionRects - transitionCells);
 
-        this._texts.each((d, i, e) => this.zoomTexts(d, i, e));
+        this._texts.attr("visibility", "hidden");
+        setTimeout(() => {this._texts.each((d, i, e) => this.zoomTexts(d, i, e))}, 0);
 
         var endTime = new Date().getTime();
 
         console.log("transition Texts: ", endTime - transitionRects);
 
         console.log("elapsed total: ", endTime - startTime);
-    }
-
-    private zoomCells(node: d3.HierarchyRectangularNode<INode>, index: number, elementGroup: SVGGElement[] | ArrayLike<SVGGElement>) {
-        let rectElement: SVGGElement = elementGroup[index];
-        rectElement.setAttribute("transform", `translate(${node.data.fade ? 0 : this._scaleX(node.x0)},${this.getOffsetY(node)})`);
     }
 
     private zoomRects(node: d3.HierarchyRectangularNode<INode>, index: number, elementGroup: SVGRectElement[] | ArrayLike<SVGRectElement>) {
@@ -253,6 +255,8 @@ class FlameChart {
 
     private zoomTexts(node: d3.HierarchyRectangularNode<INode>, index: number, elementGroup: SVGTextElement[] | ArrayLike<SVGTextElement>) {
         let textElement: SVGTextElement = elementGroup[index];
+        textElement.setAttribute("visibility", "visible");
+
         if (node.data.fade) {
             textElement.setAttribute("x", (this._width / 2).toString());
             textElement.textContent = node.data.name;
