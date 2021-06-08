@@ -197,7 +197,6 @@ class FlameChart {
     }
 
     private onZoom(p: d3.HierarchyRectangularNode<INode>) {
-        var startTime = new Date().getTime();
         this._currentFocus = this._currentFocus === p ? p = p.parent ?? p : p;
 
         if (!p) {
@@ -214,41 +213,30 @@ class FlameChart {
             d.x1 = d.x1 - rootx0;
         });
 
-        Utils.hideSiblings(p);
         Utils.fadeAncestors(p);
         Utils.show(p);
 
         this._groups
             .attr("transform", (d: d3.HierarchyRectangularNode<INode>) => `translate(${d.data.fade ? 0 : this._scaleX(d.x0)},${this.getOffsetY(d)})`);
 
-        var transitionCells = new Date().getTime();
-        console.log("transition cells: ", transitionCells - startTime);
-
         this._rects.each((d, i, e) => this.zoomRects(d, i, e));
 
-        var transitionRects = new Date().getTime();
-        console.log("transition rects: ", transitionRects - transitionCells);
+        setTimeout(() => {
+            Utils.hideSiblings(p);
+            this._rects.attr("tabindex", (d: d3.HierarchyRectangularNode<INode>) => d.data.hide ? -1 : 0);
+        }, 0);
 
         this._texts.attr("visibility", "hidden");
         setTimeout(() => {this._texts.each((d, i, e) => this.zoomTexts(d, i, e))}, 0);
-
-        var endTime = new Date().getTime();
-
-        console.log("transition Texts: ", endTime - transitionRects);
-
-        console.log("elapsed total: ", endTime - startTime);
     }
 
     private zoomRects(node: d3.HierarchyRectangularNode<INode>, index: number, elementGroup: SVGRectElement[] | ArrayLike<SVGRectElement>) {
         let rectElement: SVGRectElement = elementGroup[index];
-        if (node.data.hide) {
-            rectElement.setAttribute("tabindex", "-1");
-        } else if (node.data.fade) {
+        if (node.data.fade) {
             rectElement.setAttribute("opacity", "0.3");
             rectElement.setAttribute("width", this._width.toString());
         } else {
             rectElement.setAttribute("opacity", "0.6");
-            rectElement.setAttribute("tabindex", "0");
             rectElement.setAttribute("width", this.getRectWidth(node).toString());
         }
     }
